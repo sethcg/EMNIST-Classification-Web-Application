@@ -1,0 +1,13 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Run Application",
+            "cwd": "${workspaceFolder}",
+            "request": "launch",
+            "mainClass": "${workspaceFolder}\\src\\main\\java\\emnist\\app\\Application.java",
+            "preLaunchTask": "Build Application"
+        },
+    ]
+}

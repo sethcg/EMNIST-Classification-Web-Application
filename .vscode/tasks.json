@@ -1,0 +1,18 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build Application",
+            "type": "shell",
+            "command": "mvn clean package",
+            // UNCOMMENT TO RUN APPLICATION WITHOUT TESTING
+            // "args": [
+            //     "-DskipTests"
+            // ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ]
+}
