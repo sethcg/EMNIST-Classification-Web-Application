@@ -1,9 +1,11 @@
 <script setup>
+import Grid from './components/Grid.vue';
 import HelloWorld from './components/HelloWorld.vue'
 </script>
 
 <template>
   <HelloWorld />
+  <Grid />
 </template>
 
 <style scoped>
