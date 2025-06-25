@@ -2,45 +2,54 @@ package emnist.app.service;
 
 public class Convolution {
  
-    
-    public static int[][] ConvolveImage(int[][] image, int width, int height) {
-		int KERNAL_SIZE = 3;
-		int[][] KERNAL = {{0, 1, 0}, {0, 1, 0}, {0, 1, 0}};
+    // [28] x [28]
+    public static float[][] cachedImage;
 
-		int row_start = (int) Math.floor(KERNAL_SIZE / 2);
-		int row_end = height - KERNAL_SIZE + 2;
+    // [3] X [8] X [8]
+    public static float[][][] cachedFilters;
 
-		int col_start = (int) Math.floor(KERNAL_SIZE / 2);
-		int col_end = width - KERNAL_SIZE + 2;
-
-		// Create a new image filled with zeros, smaller than the original by the size of the kernel
-		int[][] new_image = new int[(height - KERNAL_SIZE + 1)][(width - KERNAL_SIZE + 1)];
-		for (int x = row_start; x < row_end; x++) {
-			for (int y = col_start; y < col_end; y++) {
-				// Convolve for each point in the area defined by the borders
-				new_image[y - row_start][x - col_start] = Convolution.Convolve(image, KERNAL, KERNAL_SIZE, x, y);
-			}
-		}
-
-        return new_image;
+    public static float[][] ConvolveImage(float[][] image, float[][] filter) {
+        cachedImage = image;
+        float[][] result = new float[image.length - 2][image[0].length - 2];
+        //loop through
+        for (int i = 1; i < image.length - 2; i++) {
+            for (int j = 1; j < image[0].length - 2; j++) {
+                float[][] conv_region = GetSubMatrix(image, i - 1, i + 1, j - 1, j + 1);
+                result[i][j] = MatrixMultiplication(conv_region, filter);
+            }
+        }
+        return result;
     }
 
+    public static float[][][] ForwardPropagation(float[][] image, float[][][] filter) {
+        cachedFilters = filter; // [3] X [8] X [8]
+        float[][][] result = new float[8][26][26];
+        for (int k = 0; k < cachedFilters.length; k++) {
+            float[][] kernal = ConvolveImage(image, cachedFilters[k]);
+            // ADD KERNAL TO THE RESULT
+            result[k] = kernal;
+        }
+        return result;
+    }
 
-	public static int Convolve(int[][] image, int[][] filter, int kernelSize, int rowOffset, int columnOffset) {
-		int sum = 0;
+    public static float[][] GetSubMatrix(float[][] matrix, int rowStart, int rowEnd, int columnStart, int columnEnd) {
+        float[][] sub_matrix = new float[rowEnd - rowStart + 1][columnEnd - columnStart + 1];
+        for (int x = 0; x < sub_matrix.length; x++) {
+            for (int y = 0; y < sub_matrix[0].length; y++) {
+                sub_matrix[x][y] = matrix[rowStart + x][columnStart + y];
+            }
+        }
+        return sub_matrix;
+	}
 
-		// Determine the starting point of the kernel
-		int kernelOffset = (int) -Math.floor(kernelSize / 2);
-
-		// Convolution: multiply the image and filter elements and sum them
-		for (int x = 0; x < kernelSize; x++) {
-			for (int y = 0; y < kernelSize; y++) {
-				sum += image[columnOffset + kernelOffset + x][rowOffset + kernelOffset + y] * filter[x][y];
-			}
-		}
-
-		// Return the result of convolution for a given point
-		return sum;
+	public static float MatrixMultiplication(float[][] matrixOne, float[][] matrixTwo) {
+        float sum = 0;
+        for (int x = 0; x < matrixOne.length; x++) {
+            for (int y = 0; y < matrixTwo[0].length; y++) {
+                sum += matrixOne[x][y] * matrixTwo[x][y];
+            }
+        }
+        return sum;
 	}
 
 }

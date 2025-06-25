@@ -7,7 +7,7 @@ public class Service {
 	private final static int PIXEL_ARRAY_SIZE = 784;
 
 	// TEST DATA FOR THE NUMBER SEVEN
-	public final static int[] SEVEN_TEST_DIGIT = {
+	public final static float[] SEVEN_TEST_DIGIT = {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
@@ -38,30 +38,47 @@ public class Service {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     };
 
-	public static void GetConvolveImageGrid(int[] data) 
+	public static void GetConvolveImageGrid(float[] data) 
 	{
         // ERROR, INCORRECT LENGTH ARRAY
         if(data.length != PIXEL_ARRAY_SIZE) return;
 
-		int[][] imageMatrix = new int[IMAGE_WIDTH][IMAGE_HEIGHT];
+		float[][] imageMatrix = new float[IMAGE_WIDTH][IMAGE_HEIGHT];
 		int index = 0;
-		for(int i = 0; i < IMAGE_WIDTH; i++){
-            for(int j = 0; j < IMAGE_HEIGHT; j++){
-                imageMatrix[i][j] = data[index];
+		for(int x = 0; x < IMAGE_WIDTH; x++){
+            for(int y = 0; y < IMAGE_HEIGHT; y++){
+                imageMatrix[x][y] = data[index];
                 index++;
             }
         }
 
-        int[][] newImage = Convolution.ConvolveImage(imageMatrix, IMAGE_WIDTH, IMAGE_HEIGHT);
+        float[][] prewitt_horizontal_filter = new float[][] {
+            { -1, 0, 1 },
+            { -1, 0, 1 },
+            { -1, 0, 1 }
+        };
+        // float[][] prewitt_vertical_filter = new float[][] {
+        //     { 1, 1, 1 },
+        //     { 0, 0, 0 },
+        //     { -1, -1, -1 }
+        // };
+        System.out.println();
+        float[][] newImage = Convolution.ConvolveImage(imageMatrix, prewitt_horizontal_filter);
+
+        System.out.println();
         Service.printMatrix(newImage);
 	}
 
-	public static void printMatrix(int matrix[][])
+	public static void printMatrix(float matrix[][])
     {
         for (int i = 0; i < matrix.length; i++){
 			System.out.println();
             for (int j = 0; j < matrix[i].length; j++){
-				System.out.print(matrix[i][j] + " ");
+                if(matrix[i][j] > 0){
+                    System.out.print(Math.round(matrix[i][j]) + " ");
+                } else {
+                    System.out.print("  ");
+                }
 			}
 		}
     }
