@@ -52,18 +52,8 @@ public class Service {
             }
         }
 
-        float[][] prewitt_horizontal_filter = new float[][] {
-            { -1, 0, 1 },
-            { -1, 0, 1 },
-            { -1, 0, 1 }
-        };
-        // float[][] prewitt_vertical_filter = new float[][] {
-        //     { 1, 1, 1 },
-        //     { 0, 0, 0 },
-        //     { -1, -1, -1 }
-        // };
         System.out.println();
-        float[][] newImage = Convolution.ConvolveImage(imageMatrix, prewitt_horizontal_filter);
+        float[][] newImage = Convolution.ConvolveImage(imageMatrix, KernalFilter.PREWITT_HORIZONTAL_FILTER);
 
         System.out.println();
         Service.printMatrix(newImage);
