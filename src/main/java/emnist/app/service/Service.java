@@ -58,12 +58,12 @@ public class Service {
         // ------------------------------------------------------
 
         // System.out.println();
-        // float[][] newImage = Convolution.ConvolveImage(imageMatrix, KernalFilter.PREWITT_HORIZONTAL_FILTER);
+        // float[][] newImage = Convolution.convolveImage(imageMatrix, KernalFilter.PREWITT_HORIZONTAL_FILTER);
 
         // System.out.println();
         // Service.printMatrix(newImage);
 
-        float[][][] test = ConvolutionalNeuralNetwork.InitializeFilters(8, 3, 3);
+        float[][][] test = ConvolutionalNeuralNetwork.initializeFilters(8, 3, 3);
         Service.printMatrix(test[0]); // PRINT THE FIRST FILTER
         Service.printMatrix(test[1]); // PRINT THE SECOND FILTER
         Service.printMatrix(test[2]);

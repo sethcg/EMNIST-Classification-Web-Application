@@ -4,7 +4,7 @@ import java.util.Random;
 
 public class ConvolutionalNeuralNetwork {
 
-    public static float[][][] InitializeFilters(int kernalSize, int width, int height) {
+    public static float[][][] initializeFilters(int kernalSize, int width, int height) {
         Random random = new Random();
         float[][][] result = new float[kernalSize][width][height];
         for (int k = 0; k < kernalSize; k++) {
