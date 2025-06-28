@@ -1,5 +1,7 @@
 package emnist.app.service;
 
+import java.text.DecimalFormat;
+
 public class Service {
 
 	private final static int IMAGE_WIDTH = 28;
@@ -52,11 +54,24 @@ public class Service {
             }
         }
 
-        System.out.println();
-        float[][] newImage = Convolution.ConvolveImage(imageMatrix, KernalFilter.PREWITT_HORIZONTAL_FILTER);
+        // TESTING AREA:
+        // ------------------------------------------------------
 
-        System.out.println();
-        Service.printMatrix(newImage);
+        // System.out.println();
+        // float[][] newImage = Convolution.ConvolveImage(imageMatrix, KernalFilter.PREWITT_HORIZONTAL_FILTER);
+
+        // System.out.println();
+        // Service.printMatrix(newImage);
+
+        float[][][] test = ConvolutionalNeuralNetwork.InitializeFilters(8, 3, 3);
+        Service.printMatrix(test[0]); // PRINT THE FIRST FILTER
+        Service.printMatrix(test[1]); // PRINT THE SECOND FILTER
+        Service.printMatrix(test[2]);
+        Service.printMatrix(test[3]);
+        Service.printMatrix(test[4]);
+        Service.printMatrix(test[5]);
+        Service.printMatrix(test[6]);
+        Service.printMatrix(test[7]);
 	}
 
 	public static void printMatrix(float matrix[][])
@@ -65,7 +80,8 @@ public class Service {
 			System.out.println();
             for (int j = 0; j < matrix[i].length; j++){
                 if(matrix[i][j] > 0){
-                    System.out.print(Math.round(matrix[i][j]) + " ");
+                    DecimalFormat decimalFormat = new DecimalFormat("#.####");
+                    System.out.print(decimalFormat.format(matrix[i][j]) + " ");
                 } else {
                     System.out.print("  ");
                 }
