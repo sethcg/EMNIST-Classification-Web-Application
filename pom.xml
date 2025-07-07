@@ -18,8 +18,10 @@
 		<java.version>21</java.version>
 		<node.version>v22.14.0</node.version>
 		<npm.version>11.3.0</npm.version>
+		<arrow.version>18.3.0</arrow.version>
 	</properties>
 	<dependencies>
+		<!-- SPRING BOOT -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
@@ -39,26 +41,19 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+
+		<!-- APACHE ARROW PARQUET -->
 		<dependency>
-			<groupId>org.apache.parquet</groupId>
-			<artifactId>parquet-common</artifactId>
-			<version>1.15.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.parquet</groupId>
-			<artifactId>parquet-encoding</artifactId>
-			<version>1.15.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.parquet</groupId>
-			<artifactId>parquet-column</artifactId>
-			<version>1.15.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.parquet</groupId>
-			<artifactId>parquet-hadoop</artifactId>
-			<version>1.15.1</version>
-		</dependency>
+            <groupId>org.apache.arrow</groupId>
+            <artifactId>arrow-dataset</artifactId>
+            <version>${arrow.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.arrow</groupId>
+            <artifactId>arrow-memory-netty</artifactId>
+            <version>${arrow.version}</version>
+            <scope>runtime</scope>
+        </dependency>
 	</dependencies>
 
 	<build>

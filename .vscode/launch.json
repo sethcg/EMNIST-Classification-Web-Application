@@ -3,6 +3,7 @@
     "configurations": [
         {
             "type": "java",
+            "vmArgs": "--add-opens=java.base/java.nio=org.apache.arrow.memory.core,ALL-UNNAMED",
             "name": "Run Application",
             "cwd": "${workspaceFolder}",
             "request": "launch",

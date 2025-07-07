@@ -2,6 +2,8 @@ package emnist.app.service;
 
 import java.text.DecimalFormat;
 
+import emnist.app.service.ImageProcessor.TrainingImageProcessor;
+
 public class Service {
 
 	private final static int IMAGE_WIDTH = 28;
@@ -57,21 +59,22 @@ public class Service {
         // TESTING AREA:
         // ------------------------------------------------------
 
-        // System.out.println();
-        // float[][] newImage = Convolution.convolveImage(imageMatrix, KernalFilter.PREWITT_HORIZONTAL_FILTER);
+        String uri = "file:/" + System.getProperty("user.dir") + "/src/main/java/emnist/app/data/train.parquet";
+        
+        TrainingImageProcessor processor = new ImageProcessor.TrainingImageProcessor();
+        ParquetFileReader reader = new ParquetFileReader();
+        reader.read(uri, 2, processor);
+        System.out.println(processor.totalRows);
 
-        // System.out.println();
-        // Service.printMatrix(newImage);
-
-        float[][][] test = ConvolutionalNeuralNetwork.initializeFilters(8, 3, 3);
-        Service.printMatrix(test[0]); // PRINT THE FIRST FILTER
-        Service.printMatrix(test[1]); // PRINT THE SECOND FILTER
-        Service.printMatrix(test[2]);
-        Service.printMatrix(test[3]);
-        Service.printMatrix(test[4]);
-        Service.printMatrix(test[5]);
-        Service.printMatrix(test[6]);
-        Service.printMatrix(test[7]);
+        // float[][][] test = ConvolutionalNeuralNetwork.initializeFilters(8, 3, 3);
+        // Service.printMatrix(test[0]); // PRINT THE FIRST FILTER
+        // Service.printMatrix(test[1]); // PRINT THE SECOND FILTER
+        // Service.printMatrix(test[2]);
+        // Service.printMatrix(test[3]);
+        // Service.printMatrix(test[4]);
+        // Service.printMatrix(test[5]);
+        // Service.printMatrix(test[6]);
+        // Service.printMatrix(test[7]);
 	}
 
 	public static void printMatrix(float matrix[][])

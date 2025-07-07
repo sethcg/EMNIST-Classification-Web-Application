@@ -2,7 +2,7 @@ package emnist.app.service;
 
 public class KernalFilter {
 
-    // PREWITT FILTERS: basic edge detection filter
+    // PREWITT FILTERS: BASIC EDGE DETECTION FILTER
     public final static float[][] PREWITT_HORIZONTAL_FILTER = new float[][] {
         { -1, 0, 1 },
         { -1, 0, 1 },
@@ -15,7 +15,7 @@ public class KernalFilter {
         { -1, -1, -1 }
     };
 
-    // SOBEL FILTERS: edge detection similar to prewitt filters, but higher edge pixel intensity (sharper)
+    // SOBEL FILTERS: EDGE DETECTION SIMILAR TO PREWITT FILTERS, BUT HIGHER EDGE PIXEL INTENSITY (SHARPER)
     public final static float[][] SOBEL_HORIZONTAL_FILTER = new float[][] {
         { -1, 0, 1 },
         { -2, 0, 2 },
