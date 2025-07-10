@@ -1,4 +1,4 @@
-package emnist.app.service;
+package emnist.app.service.helper;
 
 import java.io.ByteArrayInputStream;
 
@@ -25,7 +25,7 @@ import org.apache.arrow.vector.ipc.ArrowReader;
 import java.util.function.Consumer;
 
 public class ParquetFileReader {
-    void read(String uri, Integer batchSize, Consumer<HashMap<Integer, float[][]>> processBatch) {
+    public void read(String uri, Integer batchSize, Consumer<HashMap<Integer, float[][]>> processBatch) {
         ScanOptions options = new ScanOptions(batchSize);
         try (
                 BufferAllocator allocator = new RootAllocator();
@@ -37,29 +37,19 @@ public class ParquetFileReader {
                 try (VectorSchemaRoot root = reader.getVectorSchemaRoot()) {
                     HashMap<Integer, float[][]> batchResults = new HashMap<Integer, float[][]>();
                     for (int i = 0; i < root.getRowCount(); i++) {
+                        // GET IMAGE
                         String objectString = root.getVector("image").getObject(i).toString();
                         String base64String = objectString.replaceAll("\\{|\\}|\\\"", "").split(":")[1];
                         byte[] bytes = Base64.getDecoder().decode(base64String);
                         ByteArrayInputStream imageStream = new ByteArrayInputStream(bytes);
                         BufferedImage image = ImageIO.read(imageStream);             
-                        int height = image.getHeight();
-                        int width = image.getWidth();
-                        float[][] pixels = new float[height][width];
-                        for (int row = 0; row < height; row++) {
-                            for (int col = 0; col < width; col++) {
-                                int colorValue = image.getRGB(row, col);
-                                int r = (colorValue & 0x00ff0000) >> 16;
-                                int g = (colorValue & 0x0000ff00) >> 8;
-                                int b = (colorValue & 0x000000ff);
-                                Boolean hasColor = (r + g + b) != 0;
-                                pixels[row][col] = hasColor ? 1 : 0;
-                            }
-                        }
+                        float[][] pixelMatrix = getMatrixFromImage(image);
+
                         // GET LABEL
                         BigIntVector labelVector = (BigIntVector) root.getVector("label");
                         Integer label = Long.valueOf(labelVector.get(i)).intValue();
 
-                        batchResults.put(label, pixels);
+                        batchResults.put(label, pixelMatrix);
                     }
                     processBatch.accept(batchResults);
                 }
@@ -72,4 +62,19 @@ public class ParquetFileReader {
             exception.printStackTrace();
         }
     }
+
+    private static float[][] getMatrixFromImage(BufferedImage image) {
+        int height = image.getHeight();
+        int width = image.getWidth();
+        float[][] matrix = new float[height][width];
+        for (int row = 0; row < height; row++) {
+            for (int col = 0; col < width; col++) {
+                int colorValue = image.getRGB(row, col);
+                // NORMALIZE THE COLOR VALUE BETWEEN 0.0 AND 1.0
+                matrix[row][col] = ((colorValue >> 16 & 0xff)) / 255.0f;
+            }
+        }
+        return matrix;
+    }
+
 }

@@ -1,12 +1,14 @@
-package emnist.app.service;
+package emnist.app.service.helper;
 
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
 
+import emnist.app.service.Service;
+
 public class ImageProcessor {
 
-    static class TrainingImageProcessor implements Consumer<HashMap<Integer, float[][]>> {
+    public static class TrainingImageProcessor implements Consumer<HashMap<Integer, float[][]>> {
 
         public Integer totalRows = 0;
         public Integer batches = 0;
@@ -18,15 +20,15 @@ public class ImageProcessor {
 
             // DO TRAINING WITH IMAGES HERE
             for(Entry<Integer, float[][]> entry : images.entrySet()) {
-                Integer key = entry.getKey();
-                System.out.println(key);
+                // Integer key = entry.getKey();
+                // System.out.println(key);
                 Service.printMatrix(entry.getValue());
             }
 
         }
     }
 
-    static class TestingImageProcessor implements Consumer<HashMap<Integer, float[][]>> {
+    public static class TestingImageProcessor implements Consumer<HashMap<Integer, float[][]>> {
 
         public Integer totalRows = 0;
         public Integer batches = 0;

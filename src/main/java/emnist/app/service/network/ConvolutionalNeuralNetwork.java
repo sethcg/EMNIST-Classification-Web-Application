@@ -1,4 +1,4 @@
-package emnist.app.service;
+package emnist.app.service.network;
 
 import java.util.Random;
 
