@@ -3,6 +3,7 @@ package emnist.app.service;
 import emnist.app.service.helper.ImageProcessor;
 import emnist.app.service.helper.ParquetFileReader;
 import emnist.app.service.helper.ImageProcessor.TrainingImageProcessor;
+import emnist.app.service.network.ConvolutionalNeuralNetwork;
 
 public class Service {
 
@@ -13,11 +14,13 @@ public class Service {
 	public static void GetConvolveImageGrid() 
 	{
         // TESTING AREA:
-        String uri = "file:/" + System.getProperty("user.dir") + "/src/main/java/emnist/app/data/train.parquet";
-        
-        TrainingImageProcessor processor = new ImageProcessor.TrainingImageProcessor();
+        ConvolutionalNeuralNetwork network = new ConvolutionalNeuralNetwork();
+
+        String uri = "file:/" + System.getProperty("user.dir") + "/src/main/java/emnist/app/data/train.parquet";      
+        TrainingImageProcessor processor = new ImageProcessor.TrainingImageProcessor(network);
         ParquetFileReader reader = new ParquetFileReader();
         reader.read(uri, 2, processor);
+        
         // System.out.println(processor.totalRows);
 
         // float[][][] test = ConvolutionalNeuralNetwork.initializeFilters(8, 3, 3);
