@@ -19,7 +19,11 @@ public class Service {
         String uri = "file:/" + System.getProperty("user.dir") + "/src/main/java/emnist/app/data/train.parquet";      
         TrainingImageProcessor processor = new ImageProcessor.TrainingImageProcessor(network);
         ParquetFileReader reader = new ParquetFileReader();
-        reader.read(uri, 2, processor);
+
+        int batchNum = 3;
+        for(int i = 0; i < batchNum; i++) {
+            reader.read(uri, 100, processor);
+        }
         
         // System.out.println(processor.totalRows);
 

@@ -1,39 +1,29 @@
 package emnist.app.service.network;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.Random;
-
-import ch.qos.logback.core.joran.sanity.Pair;
-import emnist.app.service.helper.ImageProcessor;
-import emnist.app.service.helper.ImageProcessor.TrainingImageProcessor;
-import emnist.app.service.helper.ParquetFileReader;
+import emnist.app.service.helper.Vector;
 
 
 public class ConvolutionalNeuralNetwork {
 
-    public static float[][][] cachedFilters;
+    private static final int INPUT_LAYER_SIZE = 13 * 13 * 8;
+    private static final int OUTPUT_LAYER_SIZE = 10;
 
-    public static float[][][] initializeFilters(int kernalSize, int width, int height) {
-        Random random = new Random();
-        float[][][] result = new float[kernalSize][width][height];
-        for (int k = 0; k < kernalSize; k++) {
-            result[k] = new float[width][height];
-            for (int x = 0; x < width; x++) {
-                for (int y = 0; y < height; y++) {
-                    result[k][x][y] = random.nextFloat();
-                }
-            }
-        }
-        return result;
+    private Convolution convolution;
+    private MaxPooling maxPooling;
+    private SoftMax softMax;
+
+    public ConvolutionalNeuralNetwork() {
+        this.convolution = new Convolution();
+        this.maxPooling = new MaxPooling();
+        this.softMax = new SoftMax(INPUT_LAYER_SIZE, OUTPUT_LAYER_SIZE);
     }
 
     public class ForwardPropogation {
-        public float[] outputLayer;
+        public float[][] outputLayer;
         public double loss;
         public int accuracy;
 
-        public ForwardPropogation(float[] outputLayer, double loss, int accuracy) {
+        public ForwardPropogation(float[][] outputLayer, double loss, int accuracy) {
             this.outputLayer = outputLayer;
             this.loss = loss;
             this.accuracy = accuracy;
@@ -43,17 +33,17 @@ public class ConvolutionalNeuralNetwork {
     public ForwardPropogation forwards(float[][] image, Integer label) {
         // We transform the image from [0, 255] to [-0.5, 0.5] to make it easier
         // to work with. This is standard practice.
-        float[][][] filterLayer = Convolution.propagateForwards(image, cachedFilters);  // 28 x 28 x 1 => 26 x 26 x 8
-        float[][][] poolingLayer = MaxPooling.propagateForwards(filterLayer);           // 26 x 26 x 8 => 13 x 13 x 8
-        float[] outputLayer = SoftMax.propagateForwards(poolingLayer);                  // 13 x 13 x 8 => 10
+        float[][][] filterLayer = convolution.propagateForwards(image, convolution.cachedFilters);  // 28 x 28 x 1 => 26 x 26 x 8
+        float[][][] poolingLayer = maxPooling.propagateForwards(filterLayer);                       // 26 x 26 x 8 => 13 x 13 x 8
+        float[][] outputLayer = softMax.propagateForwards(poolingLayer);                            // 13 x 13 x 8 => 10
 
-        // Calculate cross-entropy loss and accuracy. np.log() is the natural log.
-        double loss = Math.log(outputLayer[label]);
-        
+        // Calculate cross-entropy loss and accuracy
+        double loss = Math.log(outputLayer[0][label]);
+
         int prediction = 0;
         float confidence = 0.0f;
-        for(int i = 0; i < outputLayer.length; i++){
-            float value = outputLayer[i];
+        for(int i = 0; i < outputLayer.length; i++) {
+            float value = outputLayer[0][i];
             if (value > confidence) {
                 confidence = value;
                 prediction = i;
@@ -62,6 +52,15 @@ public class ConvolutionalNeuralNetwork {
         int accuracy = prediction == label ? 1 : 0;
 
         return new ForwardPropogation(outputLayer, loss, accuracy);
+    }
+
+    public void backwards(ConvolutionalNeuralNetwork network, float[][] outputLayer, Integer label, Float learningRate) {
+        float[][] gradient = Vector.getVectorArrayOfZero(10);
+        gradient[0][label] = -1 / outputLayer[0][label];
+        float[][][] softMax_gradient = softMax.propagateBackwards(gradient, learningRate);
+        float[][][] pooling_gradient = maxPooling.propagateBackwards(softMax_gradient);
+
+        convolution.propagateBackwards(pooling_gradient, learningRate);
     }
 
 }

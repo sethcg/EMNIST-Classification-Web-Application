@@ -1,16 +1,34 @@
 package emnist.app.service.network;
 
+import java.util.Random;
+
 import emnist.app.service.helper.Matrix;
 
 public class Convolution {
- 
-    // 28 x 28
-    public static float[][] cachedImage;
+    
+    public float[][] cachedImage;
 
-    // 3 x 8 x 8
-    public static float[][][] cachedFilters;
+    public float[][][] cachedFilters;
 
-    public static float[][] convolveImage(float[][] image, float[][] filter) {
+    public Convolution(){
+        this.cachedFilters = initializeFilters(8, 3, 3);
+    }
+
+    private static float[][][] initializeFilters(int kernalSize, int width, int height) {
+        Random random = new Random();
+        float[][][] result = new float[kernalSize][width][height];
+        for (int k = 0; k < kernalSize; k++) {
+            result[k] = new float[width][height];
+            for (int x = 0; x < width; x++) {
+                for (int y = 0; y < height; y++) {
+                    result[k][x][y] = random.nextFloat();
+                }
+            }
+        }
+        return result;
+    }
+
+    private float[][] convolveImage(float[][] image, float[][] filter) {
         cachedImage = image;
         float[][] result = new float[image.length - 2][image[0].length - 2];
 
@@ -23,7 +41,7 @@ public class Convolution {
         return result;
     }
 
-    public static float[][][] propagateForwards(float[][] image, float[][][] filter) {
+    public float[][][] propagateForwards(float[][] image, float[][][] filter) {
         cachedFilters = filter; // 3 x 8 x 8
         float[][][] result = new float[8][26][26];
         for (int k = 0; k < cachedFilters.length; k++) {
@@ -34,7 +52,7 @@ public class Convolution {
         return result;
     }
 
-    public static void propagateBackwards(float[][][] inputGradientMatrix, float learningRate) {
+    public void propagateBackwards(float[][][] inputGradientMatrix, float learningRate) {
         float[][][] outputGradientMatrix = new float[cachedFilters.length][cachedFilters[0].length][cachedFilters[0][0].length];
         for(int x = 1; x < cachedImage.length - 2; x++){
             for(int y = 1; y < cachedImage[0].length - 2; y++){

@@ -3,7 +3,6 @@ package emnist.app.service.helper;
 import java.io.ByteArrayInputStream;
 
 import java.util.Base64;
-import java.util.HashMap;
 
 import javax.imageio.ImageIO;
 
@@ -25,7 +24,18 @@ import org.apache.arrow.vector.ipc.ArrowReader;
 import java.util.function.Consumer;
 
 public class ParquetFileReader {
-    public void read(String uri, Integer batchSize, Consumer<HashMap<Integer, float[][]>> processBatch) {
+
+    public class ImageItem {
+        public Integer label;
+        public float[][] image;
+
+        ImageItem(Integer label, float[][] image) {
+            this.label = label;
+            this.image = image;
+        }
+    }
+
+    public void read(String uri, Integer batchSize, Consumer<ImageItem[]> processBatch) {
         ScanOptions options = new ScanOptions(batchSize);
         try (
                 BufferAllocator allocator = new RootAllocator();
@@ -35,7 +45,7 @@ public class ParquetFileReader {
                 ArrowReader reader = scanner.scanBatches()) {
             while (reader.loadNextBatch()) {
                 try (VectorSchemaRoot root = reader.getVectorSchemaRoot()) {
-                    HashMap<Integer, float[][]> batchResults = new HashMap<Integer, float[][]>();
+                    ImageItem[] batchResults = new ImageItem[root.getRowCount()];
                     for (int i = 0; i < root.getRowCount(); i++) {
                         // GET IMAGE
                         String objectString = root.getVector("image").getObject(i).toString();
@@ -49,7 +59,8 @@ public class ParquetFileReader {
                         BigIntVector labelVector = (BigIntVector) root.getVector("label");
                         Integer label = Long.valueOf(labelVector.get(i)).intValue();
 
-                        batchResults.put(label, pixelMatrix);
+                        ImageItem imageItem = new ImageItem(label, pixelMatrix);
+                        batchResults[i] = imageItem;
                     }
                     processBatch.accept(batchResults);
                 }

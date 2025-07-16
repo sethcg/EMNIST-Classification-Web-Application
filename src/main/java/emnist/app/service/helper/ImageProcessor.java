@@ -1,16 +1,14 @@
 package emnist.app.service.helper;
 
-import java.util.HashMap;
-import java.util.Map.Entry;
 import java.util.function.Consumer;
 
-import emnist.app.service.Service;
+import emnist.app.service.helper.ParquetFileReader.ImageItem;
 import emnist.app.service.network.ConvolutionalNeuralNetwork;
 import emnist.app.service.network.ConvolutionalNeuralNetwork.ForwardPropogation;
 
 public class ImageProcessor {
 
-    public static class TrainingImageProcessor implements Consumer<HashMap<Integer, float[][]>> {
+    public static class TrainingImageProcessor implements Consumer<ImageItem[]> {
 
         public static ConvolutionalNeuralNetwork network;
         public static Float learningRate = 0.005f;
@@ -24,42 +22,41 @@ public class ImageProcessor {
         }
 
         @Override
-        public void accept(HashMap<Integer, float[][]> images) {
-            totalRows += images.size();
+        public void accept(ImageItem[] images) {
+            totalRows += images.length;
             batches += 1;
 
-            int index = 0;
-    
+            System.out.println("Total Rows: " + totalRows + " Batch Number: " + batches);
+
             // DO TRAINING WITH IMAGES HERE
-            for(Entry<Integer, float[][]> entry : images.entrySet()) {
-                Integer label = entry.getKey();
-                float[][] image = entry.getValue();
+            for(int index = 0; index < images.length; index++) {
+                float[][] image = images[index].image;
+                Integer label = images[index].label;
                 
                 // FORWARD PROPAGATE
                 ForwardPropogation forward = network.forwards(image, label);
 
                 // BACKWARD PROPAGATE
-                network.backwards(forward.outputLayer, learningRate);
+                network.backwards(network, forward.outputLayer, label, learningRate);
 
                 if(index % 100 == 0) {
-                    System.out.println(" step: "+ index + " loss: " + forward.loss / 100.0 + " accuracy: " + forward.accuracy);
+                    System.out.println(" step: " + index + " loss: " + forward.loss / 100.0 + " accuracy: " + forward.accuracy);
                     accuracySum += forward.accuracy;
                 }
-                index++;
             }
             System.out.println("average accuracy:- "+ accuracySum / totalRows + "%");
 
         }
     }
 
-    public static class TestingImageProcessor implements Consumer<HashMap<Integer, float[][]>> {
+    public static class TestingImageProcessor implements Consumer<ImageItem[]> {
 
         public Integer totalRows = 0;
         public Integer batches = 0;
 
         @Override
-        public void accept(HashMap<Integer, float[][]> images) {
-            totalRows += images.size();
+        public void accept(ImageItem[] images) {
+            totalRows += images.length;
             batches += 1;
 
             // DO TESTING WITH IMAGES HERE
