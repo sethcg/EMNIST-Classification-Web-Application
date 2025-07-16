@@ -31,15 +31,15 @@ public class Matrix {
         int columnLength = matrix[0].length;
         int kernalSize = matrix[0][0].length;
         float[][] vector = new float[1][rowLength * columnLength * kernalSize];
-        BiFunction<Integer, Integer, Void> function = (x, y) -> {
-            int index = 0;
-            for (int k = 0; k < matrix[0][0].length; k++) {
-                vector[0][index] = matrix[x][y][k];
-                index++;
+        int index = 0;
+        for (int x = 0; x < rowLength; x++) {
+            for (int y = 0; y < columnLength; y++) {
+                for (int k = 0; k < kernalSize; k++) {
+                    vector[0][index] = matrix[x][y][k];
+                    index++;
+                }
             }
-            return null;
-        };
-        FunctionHelper.executeFunction(rowLength, columnLength, function);
+        }
         return vector;
     }
     

@@ -2,6 +2,7 @@ package emnist.app.service.helper;
 
 import java.util.function.Consumer;
 
+import emnist.app.service.Service;
 import emnist.app.service.helper.ParquetFileReader.ImageItem;
 import emnist.app.service.network.ConvolutionalNeuralNetwork;
 import emnist.app.service.network.ConvolutionalNeuralNetwork.ForwardPropogation;
@@ -12,10 +13,9 @@ public class ImageProcessor {
 
         public static ConvolutionalNeuralNetwork network;
         public static Float learningRate = 0.005f;
-        public static Integer accuracySum = 0;
         
-        public static Integer totalRows = 0;
-        public static Integer batches = 0;
+        public static Integer rows = 0;
+        public static Integer batchNum = 0;
 
         public TrainingImageProcessor(ConvolutionalNeuralNetwork network) {
             TrainingImageProcessor.network = network;
@@ -23,10 +23,12 @@ public class ImageProcessor {
 
         @Override
         public void accept(ImageItem[] images) {
-            totalRows += images.length;
-            batches += 1;
+            rows += images.length;
+            batchNum += 1;
 
-            System.out.println("Total Rows: " + totalRows + " Batch Number: " + batches);
+            int steps = rows / batchNum;
+            int accurateTotal = 0;
+            double lossTotal = 0;
 
             // DO TRAINING WITH IMAGES HERE
             for(int index = 0; index < images.length; index++) {
@@ -35,17 +37,23 @@ public class ImageProcessor {
                 
                 // FORWARD PROPAGATE
                 ForwardPropogation forward = network.forwards(image, label);
-
+                
                 // BACKWARD PROPAGATE
                 network.backwards(network, forward.outputLayer, label, learningRate);
 
-                if(index % 100 == 0) {
-                    System.out.println(" step: " + index + " loss: " + forward.loss / 100.0 + " accuracy: " + forward.accuracy);
-                    accuracySum += forward.accuracy;
-                }
+                accurateTotal += forward.accurate;
+                lossTotal += forward.loss;
+                // if(index % 99 == 0 && index != 0) {
+                //     int accuracy = (int)((accuracySum * 100.0f) / totalRows);
+                //     System.out.println(" Step: " + (index + 1) + " Loss: " + forward.loss / 100.0 + " Accuracy: " + accuracy + "%");
+                // }
             }
-            System.out.println("average accuracy:- "+ accuracySum / totalRows + "%");
 
+            int accuracy = (int)((accurateTotal * 100.0f) / steps);
+            double loss = lossTotal / 100.0;
+
+            System.out.print("[Step " + steps + "] ");
+            System.out.println(" Loss: " + loss + " Accuracy: " + accuracy + "%");
         }
     }
 

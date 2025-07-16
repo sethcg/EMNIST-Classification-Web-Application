@@ -20,7 +20,8 @@ public class Service {
         TrainingImageProcessor processor = new ImageProcessor.TrainingImageProcessor(network);
         ParquetFileReader reader = new ParquetFileReader();
 
-        int batchNum = 3;
+        // int batchNum = 600;
+        int batchNum = 60;
         for(int i = 0; i < batchNum; i++) {
             reader.read(uri, 100, processor);
         }
