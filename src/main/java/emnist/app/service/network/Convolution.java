@@ -42,7 +42,7 @@ public class Convolution {
     }
 
     public float[][][] propagateForwards(float[][] image, float[][][] filter) {
-        cachedFilters = filter; // 3 x 8 x 8
+        cachedFilters = filter;
         float[][][] result = new float[8][26][26];
         for (int k = 0; k < cachedFilters.length; k++) {
             float[][] kernal = convolveImage(image, cachedFilters[k]);

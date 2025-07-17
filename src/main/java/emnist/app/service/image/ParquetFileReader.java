@@ -1,4 +1,4 @@
-package emnist.app.service.helper;
+package emnist.app.service.image;
 
 import java.io.ByteArrayInputStream;
 
@@ -25,32 +25,20 @@ import org.apache.arrow.vector.BigIntVector;
 import org.apache.arrow.vector.VectorSchemaRoot;
 import org.apache.arrow.vector.ipc.ArrowReader;
 
+import emnist.app.service.image.EmnistData.EmnistBatch;
+import emnist.app.service.image.EmnistData.EmnistEnum;
+import emnist.app.service.image.EmnistData.EmnistImage;
+
 import java.util.function.Consumer;
 
 public class ParquetFileReader {
 
-    private static final int BATCH_SIZE = 100;
-    private static final int EPOCH_SIZE = 1000;
-
-    public class ImageItem {
-        public Integer label;
-        public float[][] image;
-
-        ImageItem(Integer label, float[][] image) {
-            this.label = label;
-            this.image = image;
-        }
-    }
-
-    public void read(String uri, int numEpoch, Consumer<ImageItem[]> processBatch) {
-        int epochNum = 1;
-        int batchNum = 1;
-        int totalBatchSize = 0;
-
+    public void read(String uri, int numEpoch, EmnistEnum dataType, Consumer<EmnistData> processData) {
+        final int MAX_BATCH_NUM = ((numEpoch * EmnistData.EPOCH_SIZE) / EmnistData.BATCH_SIZE);
         try (   BufferAllocator allocator = new RootAllocator();
                 DatasetFactory datasetFactory = new FileSystemDatasetFactory(allocator, NativeMemoryPool.getDefault(), FileFormat.PARQUET, uri);
                 Dataset dataset = datasetFactory.finish();
-                Scanner scanner = dataset.newScan(new ScanOptions(BATCH_SIZE));
+                Scanner scanner = dataset.newScan(new ScanOptions(EmnistData.BATCH_SIZE));
                 ArrowReader reader = scanner.scanBatches();
                 ArrowSchema consumerArrowSchema = ArrowSchema.allocateNew(allocator)) {
 
@@ -60,12 +48,11 @@ public class ParquetFileReader {
             // Consumer loads it as an empty vector schema root
             try (   CDataDictionaryProvider consumerDictionaryProvider = new CDataDictionaryProvider();
                     VectorSchemaRoot consumerRoot = Data.importVectorSchemaRoot(allocator, consumerArrowSchema, consumerDictionaryProvider)) {
+                        
+                EmnistBatch[] batches = new EmnistBatch[MAX_BATCH_NUM];
                 
-                while (reader.loadNextBatch()) {          
-                    if(totalBatchSize % EPOCH_SIZE == 0) {
-                        if(epochNum > numEpoch) return;
-                        System.out.println("--- Epoch " + epochNum++ + " ---");
-                    }
+                int batchNum = 0;
+                while (batchNum < MAX_BATCH_NUM && reader.loadNextBatch()) {
                     try (ArrowArray consumerArray = ArrowArray.allocateNew(allocator)) {
 
                         // PRODUCER EXPORT DATA TO "consumerRoot"
@@ -74,36 +61,33 @@ public class ParquetFileReader {
                         // PRODUCER IMPORT NEXT BATCH INTO "consumerRoot"
                         Data.importIntoVectorSchemaRoot(allocator, consumerArray, consumerRoot, consumerDictionaryProvider);
 
-                        totalBatchSize += consumerRoot.getRowCount();
-                        System.out.println("Batch[" + batchNum++ + "]: " + " Rows: " + consumerRoot.getRowCount());
-
-                        ImageItem[] batchResults = new ImageItem[consumerRoot.getRowCount()];
-                        for (int i = 0; i < consumerRoot.getRowCount(); i++) {
+                        int rowCount = consumerRoot.getRowCount();
+                        EmnistImage[] images = new EmnistImage[rowCount];
+                        for (int i = 0; i < rowCount; i++) {
                             // GET IMAGE
                             String objectString = consumerRoot.getVector("image").getObject(i).toString();
                             String base64String = objectString.replaceAll("\\{|\\}|\\\"", "").split(":")[1];
                             byte[] bytes = Base64.getDecoder().decode(base64String);
                             ByteArrayInputStream imageStream = new ByteArrayInputStream(bytes);
-                            BufferedImage image = ImageIO.read(imageStream);             
-                            float[][] pixelMatrix = getMatrixFromImage(image);
+                            BufferedImage bufferedImage = ImageIO.read(imageStream);             
+                            float[][] pixelMatrix = getMatrixFromImage(bufferedImage);
 
                             // GET LABEL
                             BigIntVector labelVector = (BigIntVector) consumerRoot.getVector("label");
-                            Integer label = Long.valueOf(labelVector.get(i)).intValue();
+                            int label = Long.valueOf(labelVector.get(i)).intValue();
 
-                            ImageItem imageItem = new ImageItem(label, pixelMatrix);
-                            batchResults[i] = imageItem;
+                            images[i] = new EmnistImage(label, pixelMatrix);
                         }
-                        processBatch.accept(batchResults);
+                        batches[batchNum] = new EmnistBatch(images);
+                        batchNum++;
                     }
                 }
+                EmnistData emnistData = new EmnistData(dataType, batches);
+                processData.accept(emnistData);
             }
         } catch (Exception exception) {
             exception.printStackTrace();
         }
-
-        System.out.println();
-        System.out.println("Total batch size: " + totalBatchSize);
     }
 
     private static float[][] getMatrixFromImage(BufferedImage image) {

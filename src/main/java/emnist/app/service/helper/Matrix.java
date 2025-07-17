@@ -42,7 +42,21 @@ public class Matrix {
         }
         return vector;
     }
-    
+
+    public static float[][][] getReshapedMatrix(float[][] matrix, int depth, int rowLength, int columnLength) {
+        int index = 0;
+        float[][][] outputMatrix = new float[depth][rowLength][columnLength];
+        for(int k = 0; k < depth; k++) {
+            for(int x = 0; x < rowLength; x++) {
+                for(int y = 0; y < columnLength; y++) {
+                    outputMatrix[k][x][y] = matrix[0][index];
+                    index++;
+                }
+            }
+        }
+        return outputMatrix;
+    }
+
     public static float[][] getMultipliedMatrix(float[][] matrixOne, float[][] matrixTwo) {
         int rowLength = matrixOne.length;
         int columnLength = matrixTwo[0].length;
@@ -66,20 +80,6 @@ public class Matrix {
             return null;
         };
         FunctionHelper.executeFunction(rowLength, columnLength, function);
-        return outputMatrix;
-    }
-
-    public static float[][][] getReshapedMatrix(float[][] matrix, int depth, int rowLength, int columnLength) {
-        int index = 0;
-        float[][][] outputMatrix = new float[depth][rowLength][columnLength];
-        for(int k = 0; k < depth; k++) {
-            for(int x = 0; x < rowLength; x++) {
-                for(int y = 0; y < columnLength; y++) {
-                    outputMatrix[k][x][y] = matrix[0][index];
-                    index++;
-                }
-            }
-        }
         return outputMatrix;
     }
 

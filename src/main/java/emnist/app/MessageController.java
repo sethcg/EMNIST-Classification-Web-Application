@@ -14,7 +14,7 @@ public class MessageController {
 
     @GetMapping("")
     public String home() {
-        Service.GetConvolveImageGrid();
+        Service.TestNetworkTraining();
 
         return "Hello, Spring & Vue 👋🏻";
     }
