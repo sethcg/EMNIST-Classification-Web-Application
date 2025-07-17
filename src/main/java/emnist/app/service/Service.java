@@ -7,10 +7,6 @@ import emnist.app.service.network.ConvolutionalNeuralNetwork;
 
 public class Service {
 
-	// private final static int IMAGE_WIDTH = 28;
-	// private final static int IMAGE_HEIGHT = 28;
-	// private final static int PIXEL_ARRAY_SIZE = 784;
-
 	public static void GetConvolveImageGrid() 
 	{
         // TESTING AREA:
@@ -19,14 +15,7 @@ public class Service {
         String uri = "file:/" + System.getProperty("user.dir") + "/src/main/java/emnist/app/data/train.parquet";      
         TrainingImageProcessor processor = new ImageProcessor.TrainingImageProcessor(network);
         ParquetFileReader reader = new ParquetFileReader();
-
-        // int batchNum = 600;
-        int batchNum = 60;
-        for(int i = 0; i < batchNum; i++) {
-            reader.read(uri, 100, processor);
-        }
-        
-        // System.out.println(processor.totalRows);
+        reader.read(uri, 3, processor);
 
         // float[][][] test = ConvolutionalNeuralNetwork.initializeFilters(8, 3, 3);
         // Service.printMatrix(test[0]); // PRINT THE FIRST FILTER

@@ -8,6 +8,10 @@ import javax.imageio.ImageIO;
 
 import java.awt.image.BufferedImage;
 
+import org.apache.arrow.c.ArrowArray;
+import org.apache.arrow.c.ArrowSchema;
+import org.apache.arrow.c.CDataDictionaryProvider;
+import org.apache.arrow.c.Data;
 import org.apache.arrow.dataset.file.FileFormat;
 import org.apache.arrow.dataset.file.FileSystemDatasetFactory;
 import org.apache.arrow.dataset.jni.NativeMemoryPool;
@@ -25,6 +29,9 @@ import java.util.function.Consumer;
 
 public class ParquetFileReader {
 
+    private static final int BATCH_SIZE = 100;
+    private static final int EPOCH_SIZE = 1000;
+
     public class ImageItem {
         public Integer label;
         public float[][] image;
@@ -35,43 +42,68 @@ public class ParquetFileReader {
         }
     }
 
-    public void read(String uri, Integer batchSize, Consumer<ImageItem[]> processBatch) {
-        ScanOptions options = new ScanOptions(batchSize);
-        try (
-                BufferAllocator allocator = new RootAllocator();
+    public void read(String uri, int numEpoch, Consumer<ImageItem[]> processBatch) {
+        int epochNum = 1;
+        int batchNum = 1;
+        int totalBatchSize = 0;
+
+        try (   BufferAllocator allocator = new RootAllocator();
                 DatasetFactory datasetFactory = new FileSystemDatasetFactory(allocator, NativeMemoryPool.getDefault(), FileFormat.PARQUET, uri);
                 Dataset dataset = datasetFactory.finish();
-                Scanner scanner = dataset.newScan(options);
-                ArrowReader reader = scanner.scanBatches()) {
-            while (reader.loadNextBatch()) {
-                try (VectorSchemaRoot root = reader.getVectorSchemaRoot()) {
-                    ImageItem[] batchResults = new ImageItem[root.getRowCount()];
-                    for (int i = 0; i < root.getRowCount(); i++) {
-                        // GET IMAGE
-                        String objectString = root.getVector("image").getObject(i).toString();
-                        String base64String = objectString.replaceAll("\\{|\\}|\\\"", "").split(":")[1];
-                        byte[] bytes = Base64.getDecoder().decode(base64String);
-                        ByteArrayInputStream imageStream = new ByteArrayInputStream(bytes);
-                        BufferedImage image = ImageIO.read(imageStream);             
-                        float[][] pixelMatrix = getMatrixFromImage(image);
+                Scanner scanner = dataset.newScan(new ScanOptions(BATCH_SIZE));
+                ArrowReader reader = scanner.scanBatches();
+                ArrowSchema consumerArrowSchema = ArrowSchema.allocateNew(allocator)) {
 
-                        // GET LABEL
-                        BigIntVector labelVector = (BigIntVector) root.getVector("label");
-                        Integer label = Long.valueOf(labelVector.get(i)).intValue();
+            // PRODUCER FILL CONSUMER SCHEMA STRUCTURE
+            Data.exportSchema(allocator, reader.getVectorSchemaRoot().getSchema(), reader, consumerArrowSchema);
 
-                        ImageItem imageItem = new ImageItem(label, pixelMatrix);
-                        batchResults[i] = imageItem;
+            // Consumer loads it as an empty vector schema root
+            try (   CDataDictionaryProvider consumerDictionaryProvider = new CDataDictionaryProvider();
+                    VectorSchemaRoot consumerRoot = Data.importVectorSchemaRoot(allocator, consumerArrowSchema, consumerDictionaryProvider)) {
+                
+                while (reader.loadNextBatch()) {          
+                    if(totalBatchSize % EPOCH_SIZE == 0) {
+                        if(epochNum > numEpoch) return;
+                        System.out.println("--- Epoch " + epochNum++ + " ---");
                     }
-                    processBatch.accept(batchResults);
+                    try (ArrowArray consumerArray = ArrowArray.allocateNew(allocator)) {
+
+                        // PRODUCER EXPORT DATA TO "consumerRoot"
+                        Data.exportVectorSchemaRoot(allocator, reader.getVectorSchemaRoot(), reader, consumerArray);
+
+                        // PRODUCER IMPORT NEXT BATCH INTO "consumerRoot"
+                        Data.importIntoVectorSchemaRoot(allocator, consumerArray, consumerRoot, consumerDictionaryProvider);
+
+                        totalBatchSize += consumerRoot.getRowCount();
+                        System.out.println("Batch[" + batchNum++ + "]: " + " Rows: " + consumerRoot.getRowCount());
+
+                        ImageItem[] batchResults = new ImageItem[consumerRoot.getRowCount()];
+                        for (int i = 0; i < consumerRoot.getRowCount(); i++) {
+                            // GET IMAGE
+                            String objectString = consumerRoot.getVector("image").getObject(i).toString();
+                            String base64String = objectString.replaceAll("\\{|\\}|\\\"", "").split(":")[1];
+                            byte[] bytes = Base64.getDecoder().decode(base64String);
+                            ByteArrayInputStream imageStream = new ByteArrayInputStream(bytes);
+                            BufferedImage image = ImageIO.read(imageStream);             
+                            float[][] pixelMatrix = getMatrixFromImage(image);
+
+                            // GET LABEL
+                            BigIntVector labelVector = (BigIntVector) consumerRoot.getVector("label");
+                            Integer label = Long.valueOf(labelVector.get(i)).intValue();
+
+                            ImageItem imageItem = new ImageItem(label, pixelMatrix);
+                            batchResults[i] = imageItem;
+                        }
+                        processBatch.accept(batchResults);
+                    }
                 }
             }
-        } catch (IllegalArgumentException exception) {
-            // IGNORE THIS ERROR WITH THE SCHEMA HAVING EMPTY CHILDREN,
-            // THERE IS CURRENTLY NO WORK AROUND, AND IT CAUSES NO REAL ISSUES.
-            // exception.printStackTrace();
         } catch (Exception exception) {
             exception.printStackTrace();
         }
+
+        System.out.println();
+        System.out.println("Total batch size: " + totalBatchSize);
     }
 
     private static float[][] getMatrixFromImage(BufferedImage image) {
