@@ -23,8 +23,7 @@ public class MaxPooling {
         // APPLY MAX POOLING TO REDUCE FROM [8] X [26] X [26] TO [8] X [13] X [13]
         float[][][] result = new float[image.length][image[0].length][image[0][0].length];
         for (int k = 0; k < image.length; k++) {
-            float[][] pooledMatrix = getMaxPoolingMatrix(image[k]);
-            result[k] = pooledMatrix;
+            result[k] = getMaxPoolingMatrix(image[k]);
         }
         cachedPooledImage = result;
         return result;
@@ -35,9 +34,7 @@ public class MaxPooling {
         for (int x = 0; x < cachedPooledImage.length; x++) {
             for (int y = 0; y < cachedPooledImage[0].length; y++) {
                 for (int k = 0; k < cachedPooledImage[0][0].length; k++) {
-
                     float[][] region = Matrix.getSubMatrix(cachedImage[x], y * 2, y * 2 + 1, k * 2, k * 2 + 1);
-
                     for (int m = 0; m < region.length; m++) {
                         for (int n = 0; n < region[0].length; n++) {
                             if (Math.abs(cachedPooledImage[x][y][k] - region[m][n]) < 0.00000001) {
