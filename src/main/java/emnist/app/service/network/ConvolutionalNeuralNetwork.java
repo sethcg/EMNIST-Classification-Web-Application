@@ -95,7 +95,7 @@ public class ConvolutionalNeuralNetwork implements Consumer<EmnistData> {
 
     private void forwards(float[][] image, int label) {
         // KERNAL LAYER  [8] x [26] x [26]
-        float[][][] filterLayer = convolution.propagateForwards(image, convolution.cachedFilters);
+        float[][][] filterLayer = convolution.propagateForwards(image);
         // POOLING LAYER [8] x [13] x [13]
         float[][][] poolingLayer = maxPooling.propagateForwards(filterLayer);
         // OUTPUT LAYER  [10]
