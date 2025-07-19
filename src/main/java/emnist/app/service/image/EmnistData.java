@@ -5,9 +5,14 @@ public class EmnistData {
     public static final int BATCH_SIZE = 100;
     public static final int EPOCH_SIZE = 1000;
 
-    public static enum EmnistEnum {
-        TRAIN,
-        TEST,
+    public static enum EmnistEnum { TRAIN, TEST }
+
+    public EmnistBatch[] batches;
+    public EmnistEnum dataType;
+
+    EmnistData(EmnistEnum dataType, EmnistBatch[] batches) {
+        this.dataType = dataType;
+        this.batches = batches;
     }
 
     public static class EmnistImage {
@@ -28,11 +33,4 @@ public class EmnistData {
         }
     }
 
-    public EmnistBatch[] batches;
-    public EmnistEnum dataType;
-
-    EmnistData(EmnistEnum dataType, EmnistBatch[] batches) {
-        this.dataType = dataType;
-        this.batches = batches;
-    }
 }

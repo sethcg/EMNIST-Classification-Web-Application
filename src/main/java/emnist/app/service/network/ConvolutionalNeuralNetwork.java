@@ -7,7 +7,6 @@ import emnist.app.service.image.EmnistData;
 import emnist.app.service.image.EmnistData.EmnistBatch;
 import emnist.app.service.image.EmnistData.EmnistImage;
 
-
 public class ConvolutionalNeuralNetwork implements Consumer<EmnistData> {
 
     private static final int INPUT_LAYER_SIZE = 13 * 13 * 8;
@@ -49,7 +48,7 @@ public class ConvolutionalNeuralNetwork implements Consumer<EmnistData> {
                 int batchNum = 0;
                 int epochNum = 0;
                 for (EmnistBatch batch : data.batches) {
-                    // DEBUG:
+                    // DEBUG
                     if(rows % EmnistData.EPOCH_SIZE == 0) {
                         System.out.print("\n---=== Epoch " + (++epochNum) + " ===---\n");
                     }
@@ -57,11 +56,12 @@ public class ConvolutionalNeuralNetwork implements Consumer<EmnistData> {
                     rows += batch.images.length;
                     int steps = (rows / (++batchNum));
 
+                    // DEBUG
                     System.out.print(String.format("%-10s", ("Batch[" + batchNum + "]:")));
 
                     TrainingResult result = this.train((rows / batchNum), batch.images);
 
-                    // DEBUG:
+                    // DEBUG
                     System.out.print(" (Step: " + steps + ")");
                     System.out.print(" Loss: " + String.format("%.2f", result.loss) + " Accuracy: " + result.accuracy + "%\n");
                 }
@@ -75,7 +75,7 @@ public class ConvolutionalNeuralNetwork implements Consumer<EmnistData> {
 
         for(EmnistImage emnistImage: images) {
             float[][] image = emnistImage.image;
-            Integer label = emnistImage.label;
+            int label = emnistImage.label;
             
             // FORWARD PROPAGATE
             this.forwards(image, label);
@@ -93,7 +93,7 @@ public class ConvolutionalNeuralNetwork implements Consumer<EmnistData> {
         return new TrainingResult(accuracy, loss);
     }
 
-    private void forwards(float[][] image, Integer label) {
+    private void forwards(float[][] image, int label) {
         // KERNAL LAYER  [8] x [26] x [26]
         float[][][] filterLayer = convolution.propagateForwards(image, convolution.cachedFilters);
         // POOLING LAYER [8] x [13] x [13]

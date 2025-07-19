@@ -6,12 +6,10 @@ import emnist.app.service.helper.Vector;
 public class SoftMax {
     
     public float[][] weights;
-
-    public float[][] input;
-    
     public float[][] bias;
     
-    public float[][] output;
+    public float[][] flattenedInput;
+    public float[][] softMaxTotals;
 
     public SoftMax(int input, int output) {
         weights = Matrix.getElementWiseScaling(Matrix.getRandomizedMatrix(input, output), 1.0f / input);
@@ -19,21 +17,23 @@ public class SoftMax {
     }
 
     public float[][] propagateForwards(float[][][] input) {
-        float[][] flattenedInput = Matrix.getFlattenedMatrix(input);
-        output = new float[1][bias.length];
-        output = Matrix.getElementWiseAddition(Matrix.getMultipliedMatrix(flattenedInput, weights), bias);
-        float[][] totals = Vector.getElementWiseExponentiationVectorArray(output);
-        float inv_activation_sum = 1 / Vector.getVectorArraySum(totals);
-        this.input = flattenedInput;
-        return Vector.getElementWiseScaledVectorArray(totals, inv_activation_sum);
+        // FLATTEN THE MATRIX FOR EASE OF USE
+        flattenedInput = Matrix.getFlattenedMatrix(input);
+
+        // EVALUATE THE TOTAL ACTIVATION VALUES AND CACHE THE TOTALS FOR BACK PROPAGATION.
+        float[][] activatedValues = Matrix.getElementWiseAddition(Matrix.getMultipliedMatrix(flattenedInput, weights), bias);
+        softMaxTotals = new float[1][bias.length];
+        softMaxTotals = Vector.getElementWiseExponentiationVectorArray(activatedValues);
+        
+        // NORMALIZE THE PROBABILTIES SO THAT THE SUM OF ALL PROBABILITIES IS ONE
+        float scale = 1 / Vector.getVectorArraySum(softMaxTotals);
+        return Vector.getElementWiseScaledVectorArray(softMaxTotals, scale);
     }
 
     public float[][][] propagateBackwards(float[][] d_L_d_out, float learning_rate) {
         //gradient of loss w.r.t. the total probabilites of the softmax layer.
         float[][] d_L_d_t = new float[1][d_L_d_out[0].length];
-        //repeat softmax probability computations (caching can be used to avoid this.)
-        float[][] t_exp = Vector.getElementWiseExponentiationVectorArray(output);
-        float S = Vector.getVectorArraySum(t_exp);
+        float S = Vector.getVectorArraySum(softMaxTotals);
         float[][] d_L_d_inputs = null;
         
         for (int i = 0; i < d_L_d_out[0].length; i++) {
@@ -42,12 +42,12 @@ public class SoftMax {
                 continue;
             }
             //gradient of the output layer w.r.t. the totals [1] X [10]
-            float[][] d_out_d_t = Vector.getElementWiseScaledVectorArray(t_exp, -t_exp[0][i] / (S * S));
-            d_out_d_t[0][i] = t_exp[0][i] * (S - t_exp[0][i]) / (S * S);
+            float[][] d_out_d_t = Vector.getElementWiseScaledVectorArray(softMaxTotals, -softMaxTotals[0][i] / (S * S));
+            d_out_d_t[0][i] = softMaxTotals[0][i] * (S - softMaxTotals[0][i]) / (S * S);
             
             d_L_d_t = Matrix.getElementWiseScaling(d_out_d_t, grad); 
             //gradient of totals w.r.t weights -- [1342] X [1]
-            float[][] d_t_d_weight = Matrix.getTransposedMatrix(input);
+            float[][] d_t_d_weight = Matrix.getTransposedMatrix(flattenedInput);
             //gradient of totals w.r.t inputs -- [1342] X [10] 
             float[][] d_t_d_inputs = weights;
             //gradient of Loss w.r.t. weights ---> chain rule 

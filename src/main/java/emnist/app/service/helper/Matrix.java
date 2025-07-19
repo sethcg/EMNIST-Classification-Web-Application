@@ -86,7 +86,7 @@ public class Matrix {
         FunctionHelper.executeFunction(rowLength, columnLength, function);
         return max.get();
     }
-
+    
 	public static float getElementWiseMultiplicationSum(float[][] matrixOne, float[][] matrixTwo) {
         int rowLength = matrixOne.length;
         int columnLength = matrixTwo[0].length;
