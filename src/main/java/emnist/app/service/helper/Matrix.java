@@ -80,13 +80,14 @@ public class Matrix {
         int columnLength = matrix[0].length;
         AtomicReference<Float> max = new AtomicReference<Float>(matrix[0][0]);
         BiFunction<Integer, Integer> function = (x, y) -> {
-            if(max.get() < matrix[x][y]) 
+            if(max.get() < matrix[x][y]) {
                 max.set(matrix[x][y]);
+            }
         };
         FunctionHelper.executeFunction(rowLength, columnLength, function);
         return max.get();
     }
-    
+
 	public static float getElementWiseMultiplicationSum(float[][] matrixOne, float[][] matrixTwo) {
         int rowLength = matrixOne.length;
         int columnLength = matrixTwo[0].length;

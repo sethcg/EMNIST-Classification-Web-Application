@@ -10,7 +10,7 @@ public class EmnistData {
     public EmnistBatch[] batches;
     public EmnistEnum dataType;
 
-    EmnistData(EmnistEnum dataType, EmnistBatch[] batches) {
+    public EmnistData(EmnistEnum dataType, EmnistBatch[] batches) {
         this.dataType = dataType;
         this.batches = batches;
     }
@@ -19,7 +19,7 @@ public class EmnistData {
         public int label;
         public float[][] image;
 
-        EmnistImage(int label, float[][] image) {
+        public EmnistImage(int label, float[][] image) {
             this.label = label;
             this.image = image;
         }
@@ -28,7 +28,7 @@ public class EmnistData {
     public static class EmnistBatch {
         public EmnistImage[] images;
 
-        EmnistBatch(EmnistImage[] images) {
+        public EmnistBatch(EmnistImage[] images) {
             this.images = images;
         }
     }

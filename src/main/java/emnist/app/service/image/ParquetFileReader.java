@@ -25,6 +25,9 @@ import org.apache.arrow.vector.BigIntVector;
 import org.apache.arrow.vector.VectorSchemaRoot;
 import org.apache.arrow.vector.ipc.ArrowReader;
 
+import emnist.app.service.helper.FunctionHelper;
+import emnist.app.service.helper.FunctionHelper.BiFunction;
+
 import emnist.app.service.image.EmnistData.EmnistBatch;
 import emnist.app.service.image.EmnistData.EmnistEnum;
 import emnist.app.service.image.EmnistData.EmnistImage;
@@ -91,17 +94,16 @@ public class ParquetFileReader {
     }
 
     private static float[][] getMatrixFromImage(BufferedImage image) {
-        int height = image.getHeight();
         int width = image.getWidth();
-        float[][] matrix = new float[height][width];
-        for (int row = 0; row < height; row++) {
-            for (int col = 0; col < width; col++) {
-                int colorValue = image.getRGB(row, col);
-                // NORMALIZE THE COLOR VALUE BETWEEN 0.0 AND 1.0
-                matrix[row][col] = ((colorValue >> 16 & 0xff)) / 255.0f;
-            }
-        }
-        return matrix;
+        int height = image.getHeight();
+        float[][] outputMatrix = new float[width][height];
+        BiFunction<Integer, Integer> function = (x, y) -> { 
+            int colorValue = image.getRGB(x, y);
+            // NORMALIZE THE COLOR VALUE BETWEEN 0.0 AND 1.0
+            outputMatrix[x][y] = ((colorValue >> 16 & 0xff)) / 255.0f;
+        };
+        FunctionHelper.executeFunction(width, height, function);
+        return outputMatrix;
     }
 
 }

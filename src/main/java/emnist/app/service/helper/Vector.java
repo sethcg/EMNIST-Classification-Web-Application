@@ -16,8 +16,9 @@ public class Vector {
     public static int getVectorArrayMaximumIndex(float[][] vectors) {
         AtomicReference<Integer> maxIndex = new AtomicReference<Integer>(0);
         Function<Integer> function = (index) -> {
-            if(vectors[0][maxIndex.get()] < vectors[0][index]) 
+            if(vectors[0][maxIndex.get()] < vectors[0][index]) {
                 maxIndex.set(index);
+            }
         };
         FunctionHelper.executeFunction(vectors[0].length, function);
         return maxIndex.get();
