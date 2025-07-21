@@ -6,13 +6,23 @@ import emnist.app.service.network.ConvolutionalNeuralNetwork;
 
 public class Service {
 
-	public static void TestNetworkTraining() 
+    public static ConvolutionalNeuralNetwork network;
+
+	public static void TrainNetwork() 
 	{
-        // TRAIN NETWORK
-        ConvolutionalNeuralNetwork network = new ConvolutionalNeuralNetwork();
+        int numEpoch = 10;
+        network = new ConvolutionalNeuralNetwork();
+
         String uri = "file:/" + System.getProperty("user.dir") + "/src/main/java/emnist/app/data/train.parquet";      
         ParquetFileReader reader = new ParquetFileReader();
-        reader.read(uri, 2, EmnistEnum.TRAIN, network);
+        reader.read(uri, numEpoch, EmnistEnum.TRAIN, network);
+	}
+
+    public static void TestNetwork() 
+	{
+        String uri = "file:/" + System.getProperty("user.dir") + "/src/main/java/emnist/app/data/test.parquet";
+        ParquetFileReader reader = new ParquetFileReader();
+        reader.read(uri, 10, EmnistEnum.TEST, network);
 	}
 
 	// public static void printMatrix(float matrix[][])

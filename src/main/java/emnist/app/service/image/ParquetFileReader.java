@@ -48,7 +48,7 @@ public class ParquetFileReader {
             // PRODUCER FILL CONSUMER SCHEMA STRUCTURE
             Data.exportSchema(allocator, reader.getVectorSchemaRoot().getSchema(), reader, consumerArrowSchema);
 
-            // Consumer loads it as an empty vector schema root
+            // CONSUMER LOADS IT AS AN EMPTY VECTOR SCHEMA ROOT
             try (   CDataDictionaryProvider consumerDictionaryProvider = new CDataDictionaryProvider();
                     VectorSchemaRoot consumerRoot = Data.importVectorSchemaRoot(allocator, consumerArrowSchema, consumerDictionaryProvider)) {
                         

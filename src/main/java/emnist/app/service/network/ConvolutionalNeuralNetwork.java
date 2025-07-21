@@ -13,10 +13,6 @@ public class ConvolutionalNeuralNetwork implements Consumer<EmnistData> {
     private static final int OUTPUT_LAYER_SIZE = 10;
     private static final float LEARNING_RATE = 0.005f;
 
-    private float[][] outputLayer;
-    private double loss;
-    private int accurate;
-
     private Convolution convolution;
     private MaxPooling maxPooling;
     private SoftMax softMax;
@@ -36,17 +32,55 @@ public class ConvolutionalNeuralNetwork implements Consumer<EmnistData> {
             this.loss = loss;
         }
     }
+
+    private class TestingResult {
+        private int numCorrect;
+        private double loss;
+
+        private TestingResult(int numCorrect, double loss) {
+            this.numCorrect = numCorrect;
+            this.loss = loss;
+        }
+    }
         
     @Override
     public void accept(EmnistData data) {
+        int rows = 0;
+        int batchNum = 0;
+        int epochNum = 0;
+
         switch(data.dataType) {
             case TEST:
-                // this.test(data.images);
+                double loss = 0;
+                int numCorrect = 0;
+
+                for (EmnistBatch batch : data.batches) {
+                    rows += batch.images.length;
+                    int steps = (rows / (++batchNum));
+
+                    // DEBUG
+                    System.out.print(String.format("%-10s", ("Batch[" + batchNum + "]:")));
+
+                    TestingResult result = this.test(steps, batch.images);
+
+                    loss += result.loss;
+                    numCorrect += result.numCorrect;
+
+                    // DEBUG
+                    double averageLoss = loss / (double) rows;
+                    double averageAccuracy = ((double) numCorrect / (double) rows) * 100.0f;
+                    System.out.print(" (Step: " + steps + ")");
+                    System.out.print(" Avg Loss: " + String.format("%.2f", averageLoss) + "%");
+                    System.out.print(" Avg Accuracy: " + String.format("%.1f", averageAccuracy) + "%\n");
+                }
+
+                // DEBUG
+                double averageLoss = loss / (double) rows;
+                double averageAccuracy = ((double) numCorrect / (double) rows) * 100.0f;
+                System.out.print("\nAverage Loss: " + String.format("%.2f", averageLoss) + "%");
+                System.out.print("\nAverage Accuracy: " + String.format("%.1f", averageAccuracy) + "%");
                 break;
             case TRAIN:
-                int rows = 0;
-                int batchNum = 0;
-                int epochNum = 0;
                 for (EmnistBatch batch : data.batches) {
                     // DEBUG
                     if(rows % EmnistData.EPOCH_SIZE == 0) {
@@ -59,7 +93,7 @@ public class ConvolutionalNeuralNetwork implements Consumer<EmnistData> {
                     // DEBUG
                     System.out.print(String.format("%-10s", ("Batch[" + batchNum + "]:")));
 
-                    TrainingResult result = this.train((rows / batchNum), batch.images);
+                    TrainingResult result = this.train(steps, batch.images);
 
                     // DEBUG
                     System.out.print(" (Step: " + steps + ")");
@@ -67,6 +101,27 @@ public class ConvolutionalNeuralNetwork implements Consumer<EmnistData> {
                 }
                 break;
         }
+    }
+
+    private TestingResult test(int steps, EmnistImage[] images) {
+        int numCorrect = 0;
+        int lossTotal = 0;
+
+        for(EmnistImage emnistImage: images) {
+            float[][] image = emnistImage.image;
+            int label = emnistImage.label;
+
+            // FORWARD PROPAGATE
+            float[][] outputLayer = this.forwards(image, label);
+
+            // CALCULATE CROSS-ENTROPY LOSS AND ACCURACY
+            double loss = Math.log(outputLayer[0][label]);
+            int accurate = label == Vector.getVectorArrayMaximumIndex(outputLayer) ? 1 : 0;
+      
+            numCorrect += accurate;
+            lossTotal += loss;
+        }
+        return new TestingResult(numCorrect, lossTotal);
     }
 
     private TrainingResult train(int steps, EmnistImage[] images) {
@@ -78,13 +133,17 @@ public class ConvolutionalNeuralNetwork implements Consumer<EmnistData> {
             int label = emnistImage.label;
             
             // FORWARD PROPAGATE
-            this.forwards(image, label);
-            
-            // BACKWARD PROPAGATE
-            this.backwards(label, LEARNING_RATE);
+            float[][] outputLayer = this.forwards(image, label);
 
-            accurateTotal += this.accurate;
-            lossTotal += this.loss;
+            // CALCULATE CROSS-ENTROPY LOSS AND ACCURACY
+            double loss = Math.log(outputLayer[0][label]);
+            int accurate = label == Vector.getVectorArrayMaximumIndex(outputLayer) ? 1 : 0;
+      
+            // BACKWARD PROPAGATE
+            this.backwards(outputLayer, label, LEARNING_RATE);
+
+            accurateTotal += accurate;
+            lossTotal += loss;
         }
 
         int accuracy = (int)((accurateTotal * 100.0f) / steps);
@@ -93,22 +152,18 @@ public class ConvolutionalNeuralNetwork implements Consumer<EmnistData> {
         return new TrainingResult(accuracy, loss);
     }
 
-    private void forwards(float[][] image, int label) {
+    private float[][] forwards(float[][] image, int label) {
         // KERNAL LAYER  [8] x [26] x [26]
         float[][][] filterLayer = convolution.propagateForwards(image);
         // POOLING LAYER [8] x [13] x [13]
         float[][][] poolingLayer = maxPooling.propagateForwards(filterLayer);
         // OUTPUT LAYER  [10]
-        this.outputLayer = softMax.propagateForwards(poolingLayer);
-
-        // CALCULATE CROSS-ENTROPY LOSS AND ACCURACY
-        this.loss = Math.log(outputLayer[0][label]);
-        this.accurate = label == Vector.getVectorArrayMaximumIndex(outputLayer) ? 1 : 0;
+        return softMax.propagateForwards(poolingLayer);
     }
 
-    private void backwards(Integer label, Float learningRate) {
+    private void backwards(float[][] outputLayer, Integer label, Float learningRate) {
         float[][] gradient = Vector.getVectorArrayOfZero(10);
-        gradient[0][label] = -1 / this.outputLayer[0][label];
+        gradient[0][label] = -1 / outputLayer[0][label];
         float[][][] softMax_gradient = softMax.propagateBackwards(gradient, learningRate);
         float[][][] pooling_gradient = maxPooling.propagateBackwards(softMax_gradient);
         convolution.propagateBackwards(pooling_gradient, learningRate);
