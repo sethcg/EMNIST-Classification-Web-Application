@@ -1,28 +1,30 @@
 package emnist.app.service;
 
+import emnist.app.service.image.EmnistData;
 import emnist.app.service.image.ParquetFileReader;
+
 import emnist.app.service.image.EmnistData.EmnistEnum;
 import emnist.app.service.network.ConvolutionalNeuralNetwork;
 
-public class Service {
+public class NetworkService {
 
-    public static ConvolutionalNeuralNetwork network;
+    private static final String TRAINING_DATA_URI = "file:/" + System.getProperty("user.dir") + "/src/main/java/emnist/app/data/train.parquet";
+    private static final String TESTING_DATA_URI = "file:/" + System.getProperty("user.dir") + "/src/main/java/emnist/app/data/test.parquet";
 
-	public static void TrainNetwork() 
-	{
-        int numEpoch = 10;
-        network = new ConvolutionalNeuralNetwork();
+    private static final ConvolutionalNeuralNetwork network = new ConvolutionalNeuralNetwork();
 
-        String uri = "file:/" + System.getProperty("user.dir") + "/src/main/java/emnist/app/data/train.parquet";      
+	public static void train() {
+        EmnistData emnistData = new EmnistData(EmnistEnum.TRAIN);
+
         ParquetFileReader reader = new ParquetFileReader();
-        reader.read(uri, numEpoch, EmnistEnum.TRAIN, network);
+        reader.read(TRAINING_DATA_URI, 10, emnistData, network);
 	}
 
-    public static void TestNetwork() 
-	{
-        String uri = "file:/" + System.getProperty("user.dir") + "/src/main/java/emnist/app/data/test.parquet";
+    public static void test() {
+        EmnistData emnistData = new EmnistData(EmnistEnum.TEST);
+        
         ParquetFileReader reader = new ParquetFileReader();
-        reader.read(uri, 10, EmnistEnum.TEST, network);
+        reader.read(TESTING_DATA_URI, 10, emnistData, network);
 	}
 
 	// public static void printMatrix(float matrix[][])

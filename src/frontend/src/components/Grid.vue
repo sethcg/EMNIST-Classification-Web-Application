@@ -2,8 +2,8 @@
 import { ref } from 'vue'
 import Cell from './Cell.vue';
 
-const items = ref([...Array(784).keys()]);
-console.log([...Array(784).fill(0)])
+const items = ref([...Array(784).fill(0)]);
+
 </script>
 
 <template>

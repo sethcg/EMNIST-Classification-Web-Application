@@ -7,12 +7,11 @@ public class EmnistData {
 
     public static enum EmnistEnum { TRAIN, TEST }
 
-    public EmnistBatch[] batches;
     public EmnistEnum dataType;
+    public EmnistBatch[] batches;
 
-    public EmnistData(EmnistEnum dataType, EmnistBatch[] batches) {
+    public EmnistData(EmnistEnum dataType) {
         this.dataType = dataType;
-        this.batches = batches;
     }
 
     public static class EmnistImage {

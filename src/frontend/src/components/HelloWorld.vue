@@ -1,28 +1,38 @@
 <script setup>
-import {onMounted, ref} from 'vue'
+import {ref} from 'vue'
 
 const msg = ref("");
+const isTrainingDone = ref(true);
 
-onMounted(() => {
-  fetch("/api/network")
-      .then((response) => response.text())
-      .then((data) => {
-        msg.value = data;
-      });
-})
+function train(event) {
+  const eventSource = new EventSource("/api/network/notification");
+  eventSource.addEventListener("trainingUpdate", (event) => {
+    const message = event.data;
+    // msg.value = event.data;
+    console.log(message);
+  });
+  eventSource.onerror = (error) => {
+    console.error("Connection error:", error);
+    eventSource.close();
+  };
+  fetch("/api/network/train")
+    .then((response) => response.text())
+    .then((data) => {
+      console.log("TRAINING COMPLETE");
+      isTrainingDone.value = false;
+      eventSource.close();
+    });
+}
 
 function test(event) {
-    fetch("/api/network/test")
-      .then((response) => response.text())
-      .then((data) => {
-        msg.value = data;
-      });
+  
 }
 </script>
 
 <template>
   <h1 class="text-3xl font-bold">{{ msg }}</h1>
-  <button @click="test">TEST NETWORK</button>
+  <button @click="train">TRAIN</button>
+  <button @click="test" :disabled="isTrainingDone">TEST</button>
 </template>
 
 <style scoped>

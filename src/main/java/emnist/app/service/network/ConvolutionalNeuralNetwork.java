@@ -2,6 +2,7 @@ package emnist.app.service.network;
 
 import java.util.function.Consumer;
 
+import emnist.app.service.NotificationService;
 import emnist.app.service.helper.Vector;
 import emnist.app.service.image.EmnistData;
 import emnist.app.service.image.EmnistData.EmnistBatch;
@@ -58,46 +59,53 @@ public class ConvolutionalNeuralNetwork implements Consumer<EmnistData> {
                     rows += batch.images.length;
                     int steps = (rows / (++batchNum));
 
-                    // DEBUG
-                    System.out.print(String.format("%-10s", ("Batch[" + batchNum + "]:")));
+                    String batchMessage = String.format("%-10s", ("Batch[" + batchNum + "]:"));
 
                     TestingResult result = this.test(steps, batch.images);
 
                     loss += result.loss;
                     numCorrect += result.numCorrect;
 
-                    // DEBUG
                     double averageLoss = loss / (double) rows;
                     double averageAccuracy = ((double) numCorrect / (double) rows) * 100.0f;
-                    System.out.print(" (Step: " + steps + ")");
-                    System.out.print(" Avg Loss: " + String.format("%.2f", averageLoss) + "%");
-                    System.out.print(" Avg Accuracy: " + String.format("%.1f", averageAccuracy) + "%\n");
+                    batchMessage += " (Step: " + steps + ")";
+                    batchMessage += " Avg Loss: " + String.format("%.2f", averageLoss) + "%";
+                    batchMessage += " Avg Accuracy: " + String.format("%.1f", averageAccuracy) + "%";
+                    NotificationService.sendNotification("testingUpdate", batchMessage);
+                    // DEBUG
+                    // System.out.println(batchMessage);
                 }
 
-                // DEBUG
                 double averageLoss = loss / (double) rows;
                 double averageAccuracy = ((double) numCorrect / (double) rows) * 100.0f;
-                System.out.print("\nAverage Loss: " + String.format("%.2f", averageLoss) + "%");
-                System.out.print("\nAverage Accuracy: " + String.format("%.1f", averageAccuracy) + "%");
+                String completeMessage = 
+                    "Average Loss: " + String.format("%.2f", averageLoss) + "%" + 
+                    "Average Accuracy: " + String.format("%.1f", averageAccuracy) + "%";
+                NotificationService.sendNotification("testingUpdate", completeMessage);
+                // DEBUG
+                // System.out.println(completeMessage);
                 break;
             case TRAIN:
                 for (EmnistBatch batch : data.batches) {
-                    // DEBUG
                     if(rows % EmnistData.EPOCH_SIZE == 0) {
-                        System.out.print("\n---=== Epoch " + (++epochNum) + " ===---\n");
+                        String epochMessage = "Epoch: " + (++epochNum);
+                        NotificationService.sendNotification("trainingUpdate", epochMessage);
+                        // DEBUG
+                        // System.out.println(epochMessage);
                     }
 
                     rows += batch.images.length;
                     int steps = (rows / (++batchNum));
 
-                    // DEBUG
-                    System.out.print(String.format("%-10s", ("Batch[" + batchNum + "]:")));
+                    String batchMessage = String.format("%-10s", ("Batch[" + batchNum + "]:"));
 
                     TrainingResult result = this.train(steps, batch.images);
 
+                    batchMessage += " (Step: " + steps + ")";
+                    batchMessage += " Loss: " + String.format("%.2f", result.loss) + " Accuracy: " + result.accuracy + "%";
+                    NotificationService.sendNotification("trainingUpdate", batchMessage);
                     // DEBUG
-                    System.out.print(" (Step: " + steps + ")");
-                    System.out.print(" Loss: " + String.format("%.2f", result.loss) + " Accuracy: " + result.accuracy + "%\n");
+                    // System.out.println(batchMessage);
                 }
                 break;
         }

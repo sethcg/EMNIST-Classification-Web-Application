@@ -29,14 +29,13 @@ import emnist.app.service.helper.FunctionHelper;
 import emnist.app.service.helper.FunctionHelper.BiFunction;
 
 import emnist.app.service.image.EmnistData.EmnistBatch;
-import emnist.app.service.image.EmnistData.EmnistEnum;
 import emnist.app.service.image.EmnistData.EmnistImage;
 
 import java.util.function.Consumer;
 
 public class ParquetFileReader {
 
-    public void read(String uri, int numEpoch, EmnistEnum dataType, Consumer<EmnistData> processData) {
+    public void read(String uri, int numEpoch, EmnistData emnistData, Consumer<EmnistData> processData) {
         final int MAX_BATCH_NUM = ((numEpoch * EmnistData.EPOCH_SIZE) / EmnistData.BATCH_SIZE);
         try (   BufferAllocator allocator = new RootAllocator();
                 DatasetFactory datasetFactory = new FileSystemDatasetFactory(allocator, NativeMemoryPool.getDefault(), FileFormat.PARQUET, uri);
@@ -85,7 +84,7 @@ public class ParquetFileReader {
                         batchNum++;
                     }
                 }
-                EmnistData emnistData = new EmnistData(dataType, batches);
+                emnistData.batches = batches;
                 processData.accept(emnistData);
             }
         } catch (Exception exception) {
