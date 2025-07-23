@@ -10,11 +10,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import emnist.app.service.NotificationService;
 import emnist.app.service.NetworkService;
+import emnist.app.service.notification.NotificationService;
 
 @RestController
-@RequestMapping("/api/network")
+@RequestMapping("/api")
 @CrossOrigin
 public class NetworkController {
 
@@ -52,5 +52,5 @@ public class NetworkController {
 
         return emitter;
     }
-    
+
 }

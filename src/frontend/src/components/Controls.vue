@@ -5,17 +5,18 @@ const msg = ref("");
 const isTrainingDone = ref(true);
 
 function train(event) {
-  const eventSource = new EventSource("/api/network/notification");
+  const eventSource = new EventSource("/api/notification");
+  eventSource.defineModel
+
   eventSource.addEventListener("trainingUpdate", (event) => {
-    const message = event.data;
-    // msg.value = event.data;
+    const message = JSON.parse(event.data);
     console.log(message);
   });
   eventSource.onerror = (error) => {
     console.error("Connection error:", error);
     eventSource.close();
   };
-  fetch("/api/network/train")
+  fetch("/api/train")
     .then((response) => response.text())
     .then((data) => {
       console.log("TRAINING COMPLETE");

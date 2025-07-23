@@ -2,11 +2,12 @@ package emnist.app.service.network;
 
 import java.util.function.Consumer;
 
-import emnist.app.service.NotificationService;
 import emnist.app.service.helper.Vector;
 import emnist.app.service.image.EmnistData;
 import emnist.app.service.image.EmnistData.EmnistBatch;
 import emnist.app.service.image.EmnistData.EmnistImage;
+import emnist.app.service.notification.Notification;
+import emnist.app.service.notification.NotificationService;
 
 public class ConvolutionalNeuralNetwork implements Consumer<EmnistData> {
 
@@ -25,10 +26,10 @@ public class ConvolutionalNeuralNetwork implements Consumer<EmnistData> {
     }
 
     private class TrainingResult {
-        private int accuracy;
+        private double accuracy;
         private double loss;
 
-        private TrainingResult(int accuracy, double loss) {
+        private TrainingResult(double accuracy, double loss) {
             this.accuracy = accuracy;
             this.loss = loss;
         }
@@ -50,16 +51,49 @@ public class ConvolutionalNeuralNetwork implements Consumer<EmnistData> {
         int batchNum = 0;
         int epochNum = 0;
 
+        Notification notification = new Notification(epochNum, batchNum);
+
         switch(data.dataType) {
+            case TRAIN:
+                for (EmnistBatch batch : data.batches) {
+                    if(rows % EmnistData.EPOCH_SIZE == 0) {
+                        // DEBUG
+                        // String epochMessage = "Epoch: " + (++epochNum);
+                        // System.out.println(epochMessage);
+
+                        notification.epochNum = epochNum;
+                    }
+
+                    rows += batch.images.length;
+                    int steps = (rows / (++batchNum));
+
+                    // DEBUG
+                    // String batchMessage = String.format("%-10s", ("Batch[" + batchNum + "]:"));
+
+                    TrainingResult result = this.train(steps, batch.images);
+
+                    // DEBUG
+                    // batchMessage += " (Step: " + steps + ")";
+                    // batchMessage += " Loss: " + String.format("%.2f", result.loss);
+                    // batchMessage += " Accuracy: " + String.format("%.1f", result.accuracy) + "%";
+                    // System.out.println(batchMessage);
+
+                    notification.steps = steps;
+                    notification.batchNum = batchNum;
+                    notification.loss = String.format("%.2f", result.loss);
+                    notification.accuracy = String.format("%.1f", result.accuracy) + "%";
+                    NotificationService.sendNotification("trainingUpdate", notification);
+                }
+                break;
             case TEST:
                 double loss = 0;
                 int numCorrect = 0;
-
                 for (EmnistBatch batch : data.batches) {
                     rows += batch.images.length;
                     int steps = (rows / (++batchNum));
 
-                    String batchMessage = String.format("%-10s", ("Batch[" + batchNum + "]:"));
+                    // DEBUG
+                    // String batchMessage = String.format("%-10s", ("Batch[" + batchNum + "]:"));
 
                     TestingResult result = this.test(steps, batch.images);
 
@@ -68,45 +102,32 @@ public class ConvolutionalNeuralNetwork implements Consumer<EmnistData> {
 
                     double averageLoss = loss / (double) rows;
                     double averageAccuracy = ((double) numCorrect / (double) rows) * 100.0f;
-                    batchMessage += " (Step: " + steps + ")";
-                    batchMessage += " Avg Loss: " + String.format("%.2f", averageLoss) + "%";
-                    batchMessage += " Avg Accuracy: " + String.format("%.1f", averageAccuracy) + "%";
-                    NotificationService.sendNotification("testingUpdate", batchMessage);
+
                     // DEBUG
+                    // batchMessage += " (Step: " + steps + ")";
+                    // batchMessage += " Avg Loss: " + String.format("%.2f", averageLoss) + "%";
+                    // batchMessage += " Avg Accuracy: " + String.format("%.1f", averageAccuracy) + "%";
                     // System.out.println(batchMessage);
+
+                    notification.steps = steps;
+                    notification.batchNum = batchNum;
+                    notification.loss = String.format("%.2f", averageLoss);
+                    notification.accuracy = String.format("%.1f", averageAccuracy) + "%";
+                    NotificationService.sendNotification("testingUpdate", notification);
                 }
 
                 double averageLoss = loss / (double) rows;
                 double averageAccuracy = ((double) numCorrect / (double) rows) * 100.0f;
-                String completeMessage = 
-                    "Average Loss: " + String.format("%.2f", averageLoss) + "%" + 
-                    "Average Accuracy: " + String.format("%.1f", averageAccuracy) + "%";
-                NotificationService.sendNotification("testingUpdate", completeMessage);
+                
                 // DEBUG
-                // System.out.println(completeMessage);
-                break;
-            case TRAIN:
-                for (EmnistBatch batch : data.batches) {
-                    if(rows % EmnistData.EPOCH_SIZE == 0) {
-                        String epochMessage = "Epoch: " + (++epochNum);
-                        NotificationService.sendNotification("trainingUpdate", epochMessage);
-                        // DEBUG
-                        // System.out.println(epochMessage);
-                    }
+                // String averageMessage = 
+                //     "Average Loss: " + String.format("%.2f", averageLoss) + "%" + 
+                //     "Average Accuracy: " + String.format("%.1f", averageAccuracy) + "%";
+                // System.out.println(averageMessage);
 
-                    rows += batch.images.length;
-                    int steps = (rows / (++batchNum));
-
-                    String batchMessage = String.format("%-10s", ("Batch[" + batchNum + "]:"));
-
-                    TrainingResult result = this.train(steps, batch.images);
-
-                    batchMessage += " (Step: " + steps + ")";
-                    batchMessage += " Loss: " + String.format("%.2f", result.loss) + " Accuracy: " + result.accuracy + "%";
-                    NotificationService.sendNotification("trainingUpdate", batchMessage);
-                    // DEBUG
-                    // System.out.println(batchMessage);
-                }
+                notification.loss = String.format("%.2f", averageLoss);
+                notification.accuracy = String.format("%.1f", averageAccuracy) + "%";
+                NotificationService.sendNotification("testingUpdate", notification);
                 break;
         }
     }
@@ -154,7 +175,7 @@ public class ConvolutionalNeuralNetwork implements Consumer<EmnistData> {
             lossTotal += loss;
         }
 
-        int accuracy = (int)((accurateTotal * 100.0f) / steps);
+        double accuracy = ((double) accurateTotal * 100.0f) / (double) steps;
         double loss = lossTotal / 100.0;
 
         return new TrainingResult(accuracy, loss);
