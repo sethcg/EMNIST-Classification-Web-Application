@@ -175,7 +175,7 @@ public class ConvolutionalNeuralNetwork implements Consumer<EmnistData> {
             lossTotal += loss;
         }
 
-        double accuracy = ((double) accurateTotal * 100.0f) / (double) steps;
+        double accuracy = (double)((accurateTotal * 100.0f) / steps);
         double loss = lossTotal / 100.0;
 
         return new TrainingResult(accuracy, loss);
