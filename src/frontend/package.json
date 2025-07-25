@@ -6,14 +6,20 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "format:check": "prettier --check \"**/*.+(js|ts|vue|json)\"",
+    "format": "prettier --write \"**/*.+(js|ts|vue|json)\""
   },
   "dependencies": {
-    "vue": "^3.5.16"
+    "vue": "^3.5.16",
+    "vue-drawing-canvas": "^1.0.14"
   },
   "devDependencies": {
+    "@fontsource-variable/roboto-flex": "^5.2.6",
+    "@iconify/vue": "^5.0.0",
     "@tailwindcss/vite": "^4.1.10",
     "@vitejs/plugin-vue": "^5.2.4",
+    "prettier": "3.6.2",
     "tailwindcss": "^4.1.10",
     "vite": "^6.3.5"
   }

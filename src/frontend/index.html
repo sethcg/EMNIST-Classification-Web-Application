@@ -5,9 +5,17 @@
     <link rel="icon" type="image/svg+xml" href="/neural-network.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>EMNIST CNN</title>
+    <style>
+      @import "tailwindcss";
+      @import "@fontsource-variable/roboto-flex";
+
+      :root {
+        font-family: "Roboto Flex Variable", monospace;
+      }
+    </style>
   </head>
-  <body>
-    <div id="app"></div>
+  <body class="bg-slate-950/85 text-slate-100 m-0 p-0 antialiased">
+    <div id="app" class="grid w-screen h-screen place-items-center"></div>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

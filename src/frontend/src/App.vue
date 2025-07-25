@@ -1,13 +1,9 @@
 <script setup>
-// import Grid from './components/Grid.vue';
-import Controls from './components/Controls.vue'
+import DrawingCanvas from './components/DrawingCanvas.vue'
 </script>
 
 <template>
-  <!-- <Grid /> -->
-  <Controls />
+  <div class="max-width-(1280px) p-8">
+    <DrawingCanvas />
+  </div>
 </template>
-
-<style scoped>
-
-</style>

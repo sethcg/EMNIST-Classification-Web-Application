@@ -19,6 +19,9 @@
 		<node.version>v22.14.0</node.version>
 		<npm.version>11.3.0</npm.version>
 		<arrow.version>18.3.0</arrow.version>
+		<frontend-maven-plugin.version>1.15.1</frontend-maven-plugin.version>
+		<maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 	<dependencies>
 		<!-- SPRING BOOT -->
@@ -54,6 +57,18 @@
             <version>${arrow.version}</version>
             <scope>runtime</scope>
         </dependency>
+
+		<!-- COPY FRONT END -->
+		<dependency>
+			<groupId>com.github.eirslett</groupId>
+			<artifactId>frontend-maven-plugin</artifactId>
+			<version>${frontend-maven-plugin.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-resources-plugin</artifactId>
+			<version>${maven-resources-plugin.version}</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -66,8 +81,7 @@
 			<plugin>
 				<groupId>com.github.eirslett</groupId>
 				<artifactId>frontend-maven-plugin</artifactId>
-				<version>1.12.1</version>
-
+				<version>${frontend-maven-plugin.version}</version>
 				<executions>
 					<execution>
 						<id>Install node and npm</id>
@@ -113,6 +127,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-resources-plugin</artifactId>
+				<version>${maven-resources-plugin.version}</version>
 				<executions>
 					<execution>
 						<id>Copy frontend into Spring Boot target static folder</id>
@@ -128,6 +143,12 @@
 									<filtering>true</filtering>
 								</resource>
 							</resources>
+							<!-- IGNORE BINARY FONTS TO PREVENT CORRUPTION -->
+							<nonFilteredFileExtensions>
+								<nonFilteredFileExtension>ttf</nonFilteredFileExtension>
+								<nonFilteredFileExtension>woff</nonFilteredFileExtension>
+								<nonFilteredFileExtension>woff2</nonFilteredFileExtension>
+							</nonFilteredFileExtensions>
 						</configuration>
 					</execution>
 				</executions>

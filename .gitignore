@@ -1,11 +1,3 @@
-# BACKEND BUILD
 target/
 /src/main/java/emnist/app/data/test
 /src/main/java/emnist/app/data/train
-
-# FRONTEND BUILD
-/src/frontend/node
-/src/frontend/node_modules
-/src/frontend/dist
-
-.env
