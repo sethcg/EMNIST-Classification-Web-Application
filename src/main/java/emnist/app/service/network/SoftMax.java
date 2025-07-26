@@ -30,38 +30,41 @@ public class SoftMax {
         return Vector.getElementWiseScaledVectorArray(softMaxTotals, scale);
     }
 
-    public float[][][] propagateBackwards(float[][] d_L_d_out, float learning_rate) {
-        //gradient of loss w.r.t. the total probabilites of the softmax layer.
-        float[][] d_L_d_t = new float[1][d_L_d_out[0].length];
-        float S = Vector.getVectorArraySum(softMaxTotals);
-        float[][] d_L_d_inputs = null;
+    public float[][][] propagateBackwards(float[][] inputGradientMatrix, float learning_rate) {
+        // GRADIENT OF THE LOSS, THE TOTAL PROBABILITIES OF THE SOFTMAX LAYER
+        float[][] lossGradient = new float[1][inputGradientMatrix[0].length];
+        float softMaxSum = Vector.getVectorArraySum(softMaxTotals);
+        float[][] lossInputGradient = null;
         
-        for (int i = 0; i < d_L_d_out[0].length; i++) {
-            float grad = d_L_d_out[0][i];
-            if (grad == 0) {
+        for (int i = 0; i < inputGradientMatrix[0].length; i++) {
+            float scale = inputGradientMatrix[0][i];
+            if (scale == 0) {
                 continue;
             }
-            //gradient of the output layer w.r.t. the totals [1] X [10]
-            float[][] d_out_d_t = Vector.getElementWiseScaledVectorArray(softMaxTotals, -softMaxTotals[0][i] / (S * S));
-            d_out_d_t[0][i] = softMaxTotals[0][i] * (S - softMaxTotals[0][i]) / (S * S);
+
+            // GRADIENT OF THE OUTPUT LAYER
+            // [1] x [10]
+            float[][] outputLayerGradient = Vector.getElementWiseScaledVectorArray(softMaxTotals, -softMaxTotals[0][i] / (softMaxSum * softMaxSum));
+            outputLayerGradient[0][i] = softMaxTotals[0][i] * (softMaxSum - softMaxTotals[0][i]) / (softMaxSum * softMaxSum);
             
-            d_L_d_t = Matrix.getElementWiseScaling(d_out_d_t, grad); 
-            //gradient of totals w.r.t weights -- [1342] X [1]
-            float[][] d_t_d_weight = Matrix.getTransposedMatrix(flattenedInput);
-            //gradient of totals w.r.t inputs -- [1342] X [10] 
-            float[][] d_t_d_inputs = weights;
-            //gradient of Loss w.r.t. weights ---> chain rule 
-            //        [1342] X [10] = [1342] X [1] * [1] X [10]
-            float[][] d_L_d_w = Matrix.getMultipliedMatrix(d_t_d_weight, d_L_d_t);
-            //gradient of Loss w.r.t. inputs ---> chain rule
-            // [1342] X [1]      [1342] X [10]    *   [10] X [1](transposed)
-            d_L_d_inputs = Matrix.getMultipliedMatrix(d_t_d_inputs, Matrix.getTransposedMatrix(d_L_d_t));
-            //gradient of loss w.r.t. bias
-            float[][] d_L_d_b = d_L_d_t;
-            //update the weight and bias matrices.
-            weights = Matrix.getElementWiseAddition(Matrix.getElementWiseScaling(d_L_d_w, -learning_rate), weights);
-            bias = Matrix.getElementWiseAddition(Matrix.getElementWiseScaling(d_L_d_b, -learning_rate), bias);
+            lossGradient = Matrix.getElementWiseScaling(outputLayerGradient, scale); 
+
+            // GRADIENT OF THE TOTALS WEIGHTS
+            // [1342] x [1]
+            float[][] totalWeightGradient = Matrix.getTransposedMatrix(flattenedInput);
+
+            // GRADIENT OF THE LOSS WEIGHTS -> CHAIN RULE
+            // [1342] x [10] = [1342] x [1] * [1] x [10]
+            float[][] lossWeightGradient = Matrix.getMultipliedMatrix(totalWeightGradient, lossGradient);
+
+            // GRADIENT OF THE LOSS INPUTS -> CHAIN RULE
+            // [1342] x [1] = [1342] x [10] * [10] x [1] (TRANSPOSED)
+            lossInputGradient = Matrix.getMultipliedMatrix(weights, Matrix.getTransposedMatrix(lossGradient));
+
+            // UPDATE WEIGHTS AND BIAS
+            weights = Matrix.getElementWiseAddition(Matrix.getElementWiseScaling(lossWeightGradient, -learning_rate), weights);
+            bias = Matrix.getElementWiseAddition(Matrix.getElementWiseScaling(lossGradient, -learning_rate), bias);
         }
-        return Matrix.getReshapedMatrix(Matrix.getTransposedMatrix(d_L_d_inputs), 8, 13, 13);
+        return Matrix.getReshapedMatrix(Matrix.getTransposedMatrix(lossInputGradient), 8, 13, 13);
     }
 }
