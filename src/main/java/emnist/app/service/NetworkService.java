@@ -14,15 +14,19 @@ public class NetworkService {
     private static final ConvolutionalNeuralNetwork network = new ConvolutionalNeuralNetwork();
 
 	public static void train() {
+        EmnistData.epochSize = 60000;
         EmnistData emnistData = new EmnistData(EmnistEnum.TRAIN);
+
         ParquetFileReader reader = new ParquetFileReader();
-        reader.read(TRAINING_DATA_URI, 10, emnistData, network);
+        reader.read(TRAINING_DATA_URI, 1, emnistData, network);
 	}
 
     public static void test() {
-        EmnistData emnistData = new EmnistData(EmnistEnum.TEST);   
+        EmnistData.epochSize = 10000;
+        EmnistData emnistData = new EmnistData(EmnistEnum.TEST);
+        
         ParquetFileReader reader = new ParquetFileReader();
-        reader.read(TESTING_DATA_URI, 10, emnistData, network);
+        reader.read(TESTING_DATA_URI, 1, emnistData, network);
 	}
 
 	// public static void printMatrix(float matrix[][])

@@ -36,11 +36,11 @@ import java.util.function.Consumer;
 public class ParquetFileReader {
 
     public void read(String uri, int numEpoch, EmnistData emnistData, Consumer<EmnistData> processData) {
-        final int MAX_BATCH_NUM = ((numEpoch * EmnistData.EPOCH_SIZE) / EmnistData.BATCH_SIZE);
+        final int TOTAL_BATCH_NUM = (numEpoch * EmnistData.epochSize) / EmnistData.batchSize;
         try (   BufferAllocator allocator = new RootAllocator();
                 DatasetFactory datasetFactory = new FileSystemDatasetFactory(allocator, NativeMemoryPool.getDefault(), FileFormat.PARQUET, uri);
                 Dataset dataset = datasetFactory.finish();
-                Scanner scanner = dataset.newScan(new ScanOptions(EmnistData.BATCH_SIZE));
+                Scanner scanner = dataset.newScan(new ScanOptions(100));
                 ArrowReader reader = scanner.scanBatches();
                 ArrowSchema consumerArrowSchema = ArrowSchema.allocateNew(allocator)) {
 
@@ -51,12 +51,13 @@ public class ParquetFileReader {
             try (   CDataDictionaryProvider consumerDictionaryProvider = new CDataDictionaryProvider();
                     VectorSchemaRoot consumerRoot = Data.importVectorSchemaRoot(allocator, consumerArrowSchema, consumerDictionaryProvider)) {
                         
-                EmnistBatch[] batches = new EmnistBatch[MAX_BATCH_NUM];
-                
                 int batchNum = 0;
-                while (batchNum < MAX_BATCH_NUM && reader.loadNextBatch()) {
-                    try (ArrowArray consumerArray = ArrowArray.allocateNew(allocator)) {
+                EmnistBatch[] batches = new EmnistBatch[TOTAL_BATCH_NUM];
 
+                int indexOffset = 0;
+                EmnistImage[] images = new EmnistImage[EmnistData.batchSize];
+                while (batchNum < TOTAL_BATCH_NUM && reader.loadNextBatch()) {
+                    try (ArrowArray consumerArray = ArrowArray.allocateNew(allocator)) {
                         // PRODUCER EXPORT DATA TO "consumerRoot"
                         Data.exportVectorSchemaRoot(allocator, reader.getVectorSchemaRoot(), reader, consumerArray);
 
@@ -64,7 +65,6 @@ public class ParquetFileReader {
                         Data.importIntoVectorSchemaRoot(allocator, consumerArray, consumerRoot, consumerDictionaryProvider);
 
                         int rowCount = consumerRoot.getRowCount();
-                        EmnistImage[] images = new EmnistImage[rowCount];
                         for (int i = 0; i < rowCount; i++) {
                             // GET IMAGE
                             String objectString = consumerRoot.getVector("image").getObject(i).toString();
@@ -78,10 +78,17 @@ public class ParquetFileReader {
                             BigIntVector labelVector = (BigIntVector) consumerRoot.getVector("label");
                             int label = Long.valueOf(labelVector.get(i)).intValue();
 
-                            images[i] = new EmnistImage(label, pixelMatrix);
+                            images[i + indexOffset] = new EmnistImage(label, pixelMatrix);
                         }
-                        batches[batchNum] = new EmnistBatch(images);
-                        batchNum++;
+                        indexOffset += rowCount;
+                        
+                        // INCREMENT BATCH, AND RESET SCANNING PROCESS
+                        if(indexOffset >= EmnistData.batchSize) {
+                            batches[batchNum] = new EmnistBatch(images);
+                            batchNum++;
+                            indexOffset = 0;
+                            images = new EmnistImage[EmnistData.batchSize];
+                        }
                     }
                 }
                 emnistData.batches = batches;

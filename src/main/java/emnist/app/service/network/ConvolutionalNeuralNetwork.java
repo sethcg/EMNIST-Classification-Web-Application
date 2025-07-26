@@ -56,7 +56,7 @@ public class ConvolutionalNeuralNetwork implements Consumer<EmnistData> {
         switch(data.dataType) {
             case TRAIN:
                 for (EmnistBatch batch : data.batches) {
-                    if(rows % EmnistData.EPOCH_SIZE == 0) {
+                    if(rows % EmnistData.epochSize == 0) {
                         // DEBUG
                         // String epochMessage = "Epoch: " + (++epochNum);
                         // System.out.println(epochMessage);
