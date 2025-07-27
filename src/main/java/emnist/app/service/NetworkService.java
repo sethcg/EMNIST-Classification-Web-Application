@@ -8,8 +8,10 @@ import emnist.app.service.network.ConvolutionalNeuralNetwork;
 
 public class NetworkService {
 
-    private static final String TRAINING_DATA_URI = "file:/" + System.getProperty("user.dir") + "/src/main/java/emnist/app/data/train.parquet";
-    private static final String TESTING_DATA_URI = "file:/" + System.getProperty("user.dir") + "/src/main/java/emnist/app/data/test.parquet";
+    public static final String DATA_DIRECTORY = System.getProperty("user.dir") + "/src/main/java/emnist/app/data/";
+    
+    private static final String TRAINING_DATA_URI = "file:/" + DATA_DIRECTORY + "train.parquet";
+    private static final String TESTING_DATA_URI = "file:/" + DATA_DIRECTORY + "test.parquet";
 
     private static final ConvolutionalNeuralNetwork network = new ConvolutionalNeuralNetwork();
 

@@ -17,7 +17,7 @@ export default defineComponent({
   },
   emits: ['update:eraser'],
   setup(_props, { emit }) {
-    const updateEraser = (event) => {
+    const updateEraser = event => {
       const enableErase = event.target.id === 'EraseButton'
       isDrawActive.value = !enableErase
       isEraseActive.value = enableErase

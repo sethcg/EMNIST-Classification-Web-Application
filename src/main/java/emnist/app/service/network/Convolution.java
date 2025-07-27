@@ -2,6 +2,7 @@ package emnist.app.service.network;
 
 import java.util.Random;
 
+import emnist.app.service.helper.FileManagement;
 import emnist.app.service.helper.FunctionHelper;
 import emnist.app.service.helper.FunctionHelper.Function;
 import emnist.app.service.helper.FunctionHelper.TriFunction;
@@ -13,8 +14,15 @@ public class Convolution {
 
     public float[][][] cachedFilters;
 
+    private float[][][] getFilters() {
+        float[][][] filters = FileManagement.Filters.getMatrixFromFile();
+        return filters == null 
+            ? initializeFilters(8, 3, 3)
+            : filters;
+    }
+
     public Convolution(){
-        this.cachedFilters = initializeFilters(8, 3, 3);
+        this.cachedFilters = getFilters();
     }
 
     private static float[][][] initializeFilters(int kernalSize, int width, int height) {

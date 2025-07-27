@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 
 const msg = ref('')
-const isTrainingDone = ref(true)
+const disableTesting = ref(true)
 
 function train(event) {
   const eventSource = new EventSource('/api/notification')
@@ -15,19 +15,32 @@ function train(event) {
     .then(response => response.text())
     .then(data => {
       console.log('TRAINING COMPLETE')
-      isTrainingDone.value = false
+      disableTesting.value = false
       eventSource.close()
     })
 }
 
-function test(event) {}
+function test(event) {
+  const eventSource = new EventSource('/api/notification')
+  eventSource.onerror = error => console.error('Connection error:', error)
+  eventSource.addEventListener('testingUpdate', event => {
+    const message = JSON.parse(event.data)
+    console.log(message)
+  })
+  fetch('/api/test')
+    .then(response => response.text())
+    .then(data => {
+      console.log('TESTING COMPLETE')
+      eventSource.close()
+    })
+}
 </script>
 
 <template>
   <div class="flex flex-col gap-2 my-2">
     <div class="flex flex-row gap-2">
       <button class="flex flex-row items-center py-2 px-4" @click="train">TRAIN</button>
-      <button class="flex flex-row items-center py-2 px-4" @click="test" :disabled="isTrainingDone">TEST</button>
+      <button class="flex flex-row items-center py-2 px-4" @click="test" :disabled="disableTesting">TEST</button>
     </div>
     <h1 class="text-xl font-bold">{{ msg }}</h1>
   </div>

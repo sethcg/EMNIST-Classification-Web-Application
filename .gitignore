@@ -1,3 +1,6 @@
 target/
+
 /src/main/java/emnist/app/data/test
 /src/main/java/emnist/app/data/train
+
+*.ser

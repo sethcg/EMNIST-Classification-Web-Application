@@ -2,6 +2,7 @@ package emnist.app.service.network;
 
 import java.util.function.Consumer;
 
+import emnist.app.service.helper.FileManagement;
 import emnist.app.service.helper.Vector;
 import emnist.app.service.image.EmnistData;
 import emnist.app.service.image.EmnistData.EmnistBatch;
@@ -84,6 +85,12 @@ public class ConvolutionalNeuralNetwork implements Consumer<EmnistData> {
                     notification.accuracy = String.format("%.1f", result.accuracy) + "%";
                     NotificationService.sendNotification("trainingUpdate", notification);
                 }
+
+                // AFTER TRAINING IS DONE SAVE THE FILTERS, WEIGHTS, BIAS FOR LATER USE
+                FileManagement.Filters.saveMatrix(convolution.cachedFilters);
+                FileManagement.Weights.saveMatrix(softMax.cachedWeights);
+                FileManagement.Bias.saveMatrix(softMax.cachedBias);
+
                 break;
             case TEST:
                 double loss = 0;

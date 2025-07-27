@@ -1,19 +1,34 @@
 package emnist.app.service.network;
 
+import emnist.app.service.helper.FileManagement;
 import emnist.app.service.helper.Matrix;
 import emnist.app.service.helper.Vector;
 
 public class SoftMax {
     
-    public float[][] weights;
-    public float[][] bias;
+    public float[][] cachedWeights;   // [1342] x [10]
+    public float[][] cachedBias;      // [1] x [10]
     
     public float[][] flattenedInput;
     public float[][] softMaxTotals;
 
+    private float[][] getBias() {
+        float[][] bias = FileManagement.Bias.getMatrixFromFile();
+        return bias == null 
+            ? Vector.getVectorArrayOfZero(10) 
+            : bias;
+    }
+
+    private float[][] getWeights(int input, int output) {
+        float[][] weights = FileManagement.Weights.getMatrixFromFile();
+        return weights == null 
+            ? Matrix.getElementWiseScaling(Matrix.getRandomizedMatrix(input, output), 1.0f / input) 
+            : weights;
+    }
+
     public SoftMax(int input, int output) {
-        weights = Matrix.getElementWiseScaling(Matrix.getRandomizedMatrix(input, output), 1.0f / input);
-        bias = Vector.getVectorArrayOfZero(10);
+        cachedWeights = getWeights(input, output);
+        cachedBias = getBias();
     }
 
     public float[][] propagateForwards(float[][][] input) {
@@ -21,8 +36,8 @@ public class SoftMax {
         flattenedInput = Matrix.getFlattenedMatrix(input);
 
         // EVALUATE THE TOTAL ACTIVATION VALUES AND CACHE THE TOTALS FOR BACK PROPAGATION.
-        float[][] activatedValues = Matrix.getElementWiseAddition(Matrix.getMultipliedMatrix(flattenedInput, weights), bias);
-        softMaxTotals = new float[1][bias.length];
+        float[][] activatedValues = Matrix.getElementWiseAddition(Matrix.getMultipliedMatrix(flattenedInput, cachedWeights), cachedBias);
+        softMaxTotals = new float[1][cachedBias.length];
         softMaxTotals = Vector.getElementWiseExponentiationVectorArray(activatedValues);
         
         // NORMALIZE THE PROBABILTIES SO THAT THE SUM OF ALL PROBABILITIES IS ONE
@@ -59,11 +74,11 @@ public class SoftMax {
 
             // GRADIENT OF THE LOSS INPUTS -> CHAIN RULE
             // [1342] x [1] = [1342] x [10] * [10] x [1] (TRANSPOSED)
-            lossInputGradient = Matrix.getMultipliedMatrix(weights, Matrix.getTransposedMatrix(lossGradient));
+            lossInputGradient = Matrix.getMultipliedMatrix(cachedWeights, Matrix.getTransposedMatrix(lossGradient));
 
             // UPDATE WEIGHTS AND BIAS
-            weights = Matrix.getElementWiseAddition(Matrix.getElementWiseScaling(lossWeightGradient, -learning_rate), weights);
-            bias = Matrix.getElementWiseAddition(Matrix.getElementWiseScaling(lossGradient, -learning_rate), bias);
+            cachedWeights = Matrix.getElementWiseAddition(Matrix.getElementWiseScaling(lossWeightGradient, -learning_rate), cachedWeights);
+            cachedBias = Matrix.getElementWiseAddition(Matrix.getElementWiseScaling(lossGradient, -learning_rate), cachedBias);
         }
         return Matrix.getReshapedMatrix(Matrix.getTransposedMatrix(lossInputGradient), 8, 13, 13);
     }
