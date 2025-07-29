@@ -5,7 +5,6 @@ import java.util.function.Consumer;
 import emnist.app.service.helper.FileManagement;
 import emnist.app.service.helper.Vector;
 import emnist.app.service.image.EmnistData;
-import emnist.app.service.image.EmnistData.EmnistBatch;
 import emnist.app.service.image.EmnistData.EmnistImage;
 import emnist.app.service.notification.Notification;
 import emnist.app.service.notification.NotificationService;
@@ -48,90 +47,64 @@ public class ConvolutionalNeuralNetwork implements Consumer<EmnistData> {
         
     @Override
     public void accept(EmnistData data) {
-        int rows = 0;
-        int batchNum = 0;
-        int epochNum = 0;
+        int rows = data.emnistBatch.rows;
+        int epochNum = data.emnistBatch.epochNum;
+        int batchNum = data.emnistBatch.batchNum;
+
+        EmnistImage[] images = data.emnistBatch.images;
+        int steps = rows / batchNum;
 
         Notification notification = new Notification(epochNum, batchNum);
 
         switch(data.dataType) {
             case TRAIN:
-                for (EmnistBatch batch : data.batches) {
-                    if(rows % EmnistData.epochSize == 0) {
-                        // DEBUG
-                        // String epochMessage = "Epoch: " + (++epochNum);
-                        // System.out.println(epochMessage);
+                // DEBUG
+                // String batchMessage = String.format("%-10s", ("Batch[" + batchNum + "]:"));
 
-                        notification.epochNum = epochNum;
-                    }
+                TrainingResult result = this.train(steps, images);
 
-                    rows += batch.images.length;
-                    int steps = (rows / (++batchNum));
+                // DEBUG
+                // batchMessage += " (Step: " + steps + ")";
+                // batchMessage += " Loss: " + String.format("%.2f", result.loss);
+                // batchMessage += " Accuracy: " + String.format("%.1f", result.accuracy) + "%";
+                // System.out.println(batchMessage);
 
-                    // DEBUG
-                    // String batchMessage = String.format("%-10s", ("Batch[" + batchNum + "]:"));
+                notification.steps = steps;
+                notification.batchNum = batchNum;
+                notification.loss = String.format("%.2f", result.loss);
+                notification.accuracy = String.format("%.1f", result.accuracy) + "%";
+                NotificationService.sendNotification("trainingUpdate", notification);
 
-                    TrainingResult result = this.train(steps, batch.images);
-
-                    // DEBUG
-                    // batchMessage += " (Step: " + steps + ")";
-                    // batchMessage += " Loss: " + String.format("%.2f", result.loss);
-                    // batchMessage += " Accuracy: " + String.format("%.1f", result.accuracy) + "%";
-                    // System.out.println(batchMessage);
-
-                    notification.steps = steps;
-                    notification.batchNum = batchNum;
-                    notification.loss = String.format("%.2f", result.loss);
-                    notification.accuracy = String.format("%.1f", result.accuracy) + "%";
-                    NotificationService.sendNotification("trainingUpdate", notification);
+                if(data.emnistBatch.isLastBatch) {
+                    // AFTER TRAINING IS DONE SAVE THE FILTERS, WEIGHTS, BIAS FOR LATER USE
+                    FileManagement.Filters.saveMatrix(convolution.cachedFilters);
+                    FileManagement.Weights.saveMatrix(softMax.cachedWeights);
+                    FileManagement.Bias.saveMatrix(softMax.cachedBias);
                 }
-
-                // AFTER TRAINING IS DONE SAVE THE FILTERS, WEIGHTS, BIAS FOR LATER USE
-                FileManagement.Filters.saveMatrix(convolution.cachedFilters);
-                FileManagement.Weights.saveMatrix(softMax.cachedWeights);
-                FileManagement.Bias.saveMatrix(softMax.cachedBias);
-
                 break;
             case TEST:
                 double loss = 0;
                 int numCorrect = 0;
-                for (EmnistBatch batch : data.batches) {
-                    rows += batch.images.length;
-                    int steps = (rows / (++batchNum));
 
-                    // DEBUG
-                    // String batchMessage = String.format("%-10s", ("Batch[" + batchNum + "]:"));
-
-                    TestingResult result = this.test(steps, batch.images);
-
-                    loss += result.loss;
-                    numCorrect += result.numCorrect;
-
-                    double averageLoss = loss / (double) rows;
-                    double averageAccuracy = ((double) numCorrect / (double) rows) * 100.0f;
-
-                    // DEBUG
-                    // batchMessage += " (Step: " + steps + ")";
-                    // batchMessage += " Avg Loss: " + String.format("%.2f", averageLoss) + "%";
-                    // batchMessage += " Avg Accuracy: " + String.format("%.1f", averageAccuracy) + "%";
-                    // System.out.println(batchMessage);
-
-                    notification.steps = steps;
-                    notification.batchNum = batchNum;
-                    notification.loss = String.format("%.2f", averageLoss);
-                    notification.accuracy = String.format("%.1f", averageAccuracy) + "%";
-                    NotificationService.sendNotification("testingUpdate", notification);
-                }
-
-                double averageLoss = loss / (double) rows;
-                double averageAccuracy = ((double) numCorrect / (double) rows) * 100.0f;
-                
                 // DEBUG
-                // String averageMessage = 
-                //     "Average Loss: " + String.format("%.2f", averageLoss) + "%" + 
-                //     "Average Accuracy: " + String.format("%.1f", averageAccuracy) + "%";
-                // System.out.println(averageMessage);
+                // String batchMessage = String.format("%-10s", ("Batch[" + batchNum + "]:"));
 
+                TestingResult testingResult = this.test(steps, images);
+
+                loss += testingResult.loss;
+                numCorrect += testingResult.numCorrect;
+
+                double averageLoss = loss / (double) steps;
+                double averageAccuracy = ((double) numCorrect / (double) steps) * 100.0f;
+
+                // DEBUG
+                // batchMessage += " (Step: " + steps + ")";
+                // batchMessage += " Avg Loss: " + String.format("%.2f", averageLoss) + "%";
+                // batchMessage += " Avg Accuracy: " + String.format("%.1f", averageAccuracy) + "%";
+                // System.out.println(batchMessage);
+
+                notification.steps = steps;
+                notification.batchNum = batchNum;
                 notification.loss = String.format("%.2f", averageLoss);
                 notification.accuracy = String.format("%.1f", averageAccuracy) + "%";
                 NotificationService.sendNotification("testingUpdate", notification);

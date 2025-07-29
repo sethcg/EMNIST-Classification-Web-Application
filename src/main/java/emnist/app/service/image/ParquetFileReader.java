@@ -51,12 +51,12 @@ public class ParquetFileReader {
             try (   CDataDictionaryProvider consumerDictionaryProvider = new CDataDictionaryProvider();
                     VectorSchemaRoot consumerRoot = Data.importVectorSchemaRoot(allocator, consumerArrowSchema, consumerDictionaryProvider)) {
                         
-                int batchNum = 0;
-                EmnistBatch[] batches = new EmnistBatch[TOTAL_BATCH_NUM];
-
+                int rows = 0;
+                int epochNum = 1;
+                int batchNum = 1;
                 int indexOffset = 0;
                 EmnistImage[] images = new EmnistImage[EmnistData.batchSize];
-                while (batchNum < TOTAL_BATCH_NUM && reader.loadNextBatch()) {
+                while (batchNum <= TOTAL_BATCH_NUM && reader.loadNextBatch()) {
                     try (ArrowArray consumerArray = ArrowArray.allocateNew(allocator)) {
                         // PRODUCER EXPORT DATA TO "consumerRoot"
                         Data.exportVectorSchemaRoot(allocator, reader.getVectorSchemaRoot(), reader, consumerArray);
@@ -80,19 +80,25 @@ public class ParquetFileReader {
 
                             images[i + indexOffset] = new EmnistImage(label, pixelMatrix);
                         }
+
+                        rows += rowCount;
                         indexOffset += rowCount;
                         
-                        // INCREMENT BATCH, AND RESET SCANNING PROCESS
-                        if(indexOffset >= EmnistData.batchSize) {
-                            batches[batchNum] = new EmnistBatch(images);
+                        // PROCESS BATCH, AND RESET BATCHING PROCESS
+                        if(indexOffset >= EmnistData.batchSize) {                     
+                            boolean isLastBatch = batchNum == TOTAL_BATCH_NUM;
+                            emnistData.emnistBatch = new EmnistBatch(rows, epochNum, batchNum, images, isLastBatch);
+                            processData.accept(emnistData);
+
+                            if(batchNum / (EmnistData.epochSize / EmnistData.batchSize) >= 1) {
+                                epochNum++;
+                            }
                             batchNum++;
                             indexOffset = 0;
                             images = new EmnistImage[EmnistData.batchSize];
                         }
                     }
                 }
-                emnistData.batches = batches;
-                processData.accept(emnistData);
             }
         } catch (Exception exception) {
             exception.printStackTrace();

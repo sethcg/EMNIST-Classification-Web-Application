@@ -8,7 +8,7 @@ public class EmnistData {
     public static enum EmnistEnum { TRAIN, TEST }
 
     public EmnistEnum dataType;
-    public EmnistBatch[] batches;
+    public EmnistBatch emnistBatch;
 
     public EmnistData(EmnistEnum dataType) {
         this.dataType = dataType;
@@ -25,10 +25,18 @@ public class EmnistData {
     }
 
     public static class EmnistBatch {
+        public int rows;
+        public int epochNum;
+        public int batchNum;
         public EmnistImage[] images;
+        public boolean isLastBatch = false;
 
-        public EmnistBatch(EmnistImage[] images) {
+        public EmnistBatch(int rows, int epochNum, int batchNum, EmnistImage[] images, boolean isLastBatch) {
+            this.rows = rows;
+            this.epochNum = epochNum;
+            this.batchNum = batchNum;
             this.images = images;
+            this.isLastBatch = isLastBatch;
         }
     }
 
