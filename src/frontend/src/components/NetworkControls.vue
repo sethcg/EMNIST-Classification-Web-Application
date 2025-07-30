@@ -1,39 +1,39 @@
 <script setup>
-import { ref } from 'vue'
+  import { ref } from 'vue';
 
-const msg = ref('')
-const disableTesting = ref(true)
+  const msg = ref('');
+  const disableTesting = ref(true);
 
-function train(event) {
-  const eventSource = new EventSource('/api/notification')
-  eventSource.onerror = error => console.error('Connection error:', error)
-  eventSource.addEventListener('trainingUpdate', event => {
-    const message = JSON.parse(event.data)
-    console.log(message)
-  })
-  fetch('/api/train')
-    .then(response => response.text())
-    .then(data => {
-      console.log('TRAINING COMPLETE')
-      disableTesting.value = false
-      eventSource.close()
-    })
-}
+  function train(event) {
+    const eventSource = new EventSource('/api/notification');
+    eventSource.onerror = (error) => console.error('Connection error:', error);
+    eventSource.addEventListener('trainingUpdate', (event) => {
+      const message = JSON.parse(event.data);
+      console.log(message);
+    });
+    fetch('/api/train')
+      .then((response) => response.text())
+      .then((data) => {
+        console.log('TRAINING COMPLETE');
+        disableTesting.value = false;
+        eventSource.close();
+      });
+  }
 
-function test(event) {
-  const eventSource = new EventSource('/api/notification')
-  eventSource.onerror = error => console.error('Connection error:', error)
-  eventSource.addEventListener('testingUpdate', event => {
-    const message = JSON.parse(event.data)
-    console.log(message)
-  })
-  fetch('/api/test')
-    .then(response => response.text())
-    .then(data => {
-      console.log('TESTING COMPLETE')
-      eventSource.close()
-    })
-}
+  function test(event) {
+    const eventSource = new EventSource('/api/notification');
+    eventSource.onerror = (error) => console.error('Connection error:', error);
+    eventSource.addEventListener('testingUpdate', (event) => {
+      const message = JSON.parse(event.data);
+      console.log(message);
+    });
+    fetch('/api/test')
+      .then((response) => response.text())
+      .then((data) => {
+        console.log('TESTING COMPLETE');
+        eventSource.close();
+      });
+  }
 </script>
 
 <template>
@@ -47,14 +47,14 @@ function test(event) {
 </template>
 
 <style scoped>
-button {
-  border-radius: 8px;
-  border: 2px solid transparent;
-  background-color: var(--color-slate-900);
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover:not(.active) {
-  border-color: var(--color-teal-700);
-}
+  button {
+    border-radius: 8px;
+    border: 2px solid transparent;
+    background-color: var(--color-slate-900);
+    cursor: pointer;
+    transition: border-color 0.25s;
+  }
+  button:hover:not(.active) {
+    border-color: var(--color-teal-700);
+  }
 </style>

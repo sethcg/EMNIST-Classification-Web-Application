@@ -1,28 +1,28 @@
 <script>
-import VueDrawingCanvas from 'vue-drawing-canvas'
-import CanvasControls from './CanvasControls.vue'
-import NetworkControls from './NetworkControls.vue'
+  import VueDrawingCanvas from 'vue-drawing-canvas';
+  import CanvasControls from './CanvasControls.vue';
+  import NetworkControls from './NetworkControls.vue';
 
-export default {
-  components: {
-    VueDrawingCanvas,
-    CanvasControls,
-    NetworkControls,
-  },
-  data() {
-    return {
-      image: '',
-      saveAs: 'png',
-      eraser: false,
-      line: 25,
-      color: '#FFFFFF',
-      strokeType: 'dash',
-      lineCap: 'round',
-      lineJoin: 'round',
-      backgroundColor: '#000000',
-    }
-  },
-}
+  export default {
+    components: {
+      VueDrawingCanvas,
+      CanvasControls,
+      NetworkControls,
+    },
+    data() {
+      return {
+        image: '',
+        saveAs: 'png',
+        eraser: false,
+        line: 25,
+        color: '#FFFFFF',
+        strokeType: 'dash',
+        lineCap: 'round',
+        lineJoin: 'round',
+        backgroundColor: '#000000',
+      };
+    },
+  };
 </script>
 
 <template>

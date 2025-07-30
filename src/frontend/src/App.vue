@@ -1,5 +1,5 @@
 <script setup>
-import DrawingCanvas from './components/DrawingCanvas.vue'
+  import DrawingCanvas from './components/DrawingCanvas.vue';
 </script>
 
 <template>

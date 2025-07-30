@@ -1,37 +1,37 @@
 <script>
-import { defineComponent, ref } from 'vue'
-import { Icon } from '@iconify/vue'
+  import { defineComponent, ref } from 'vue';
+  import { Icon } from '@iconify/vue';
 
-const isDrawActive = ref(true)
-const isEraseActive = ref(false)
+  const isDrawActive = ref(true);
+  const isEraseActive = ref(false);
 
-export default defineComponent({
-  components: {
-    Icon,
-  },
-  props: {
-    eraser: {
-      type: Boolean,
-      required: true,
+  export default defineComponent({
+    components: {
+      Icon,
     },
-  },
-  emits: ['update:eraser'],
-  setup(_props, { emit }) {
-    const updateEraser = event => {
-      const enableErase = event.target.id === 'EraseButton'
-      isDrawActive.value = !enableErase
-      isEraseActive.value = enableErase
-      emit('update:eraser', enableErase)
-    }
-    return { updateEraser }
-  },
-  data() {
-    return {
-      isDrawActive: isDrawActive,
-      isEraseActive: isEraseActive,
-    }
-  },
-})
+    props: {
+      eraser: {
+        type: Boolean,
+        required: true,
+      },
+    },
+    emits: ['update:eraser'],
+    setup(_props, { emit }) {
+      const updateEraser = (event) => {
+        const enableErase = event.target.id === 'EraseButton';
+        isDrawActive.value = !enableErase;
+        isEraseActive.value = enableErase;
+        emit('update:eraser', enableErase);
+      };
+      return { updateEraser };
+    },
+    data() {
+      return {
+        isDrawActive: isDrawActive,
+        isEraseActive: isEraseActive,
+      };
+    },
+  });
 </script>
 
 <template>
@@ -64,17 +64,17 @@ export default defineComponent({
 </template>
 
 <style scoped>
-button.active {
-  border-color: var(--color-lime-600);
-}
-button {
-  border-radius: 8px;
-  border: 2px solid transparent;
-  background-color: var(--color-slate-900);
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover:not(.active) {
-  border-color: var(--color-teal-700);
-}
+  button.active {
+    border-color: var(--color-lime-600);
+  }
+  button {
+    border-radius: 8px;
+    border: 2px solid transparent;
+    background-color: var(--color-slate-900);
+    cursor: pointer;
+    transition: border-color 0.25s;
+  }
+  button:hover:not(.active) {
+    border-color: var(--color-teal-700);
+  }
 </style>
