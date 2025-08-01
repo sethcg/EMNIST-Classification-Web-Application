@@ -4,10 +4,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import emnist.app.service.NetworkService;
@@ -18,14 +15,19 @@ import emnist.app.service.notification.NotificationService;
 @CrossOrigin
 public class NetworkController {
 
-    @GetMapping("train")
+    @PostMapping("train")
     public void train() {
         NetworkService.train();
     }
 
-    @GetMapping("test")
+    @PostMapping("test")
     public void test() {
         NetworkService.test();
+    }
+
+    @PostMapping(value = "predict", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public int predict(@RequestBody float[][] image) {
+        return NetworkService.predict(image);
     }
 
     @GetMapping(value = "notification", produces = MediaType.TEXT_EVENT_STREAM_VALUE)

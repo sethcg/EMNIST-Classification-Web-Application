@@ -4,6 +4,7 @@ import emnist.app.service.image.EmnistData;
 import emnist.app.service.image.ParquetFileReader;
 
 import emnist.app.service.image.EmnistData.EmnistEnum;
+import emnist.app.service.image.EmnistData.EmnistImage;
 import emnist.app.service.network.ConvolutionalNeuralNetwork;
 
 public class NetworkService {
@@ -31,7 +32,12 @@ public class NetworkService {
         reader.read(TESTING_DATA_URI, 1, emnistData, network);
 	}
 
-	// public static void printMatrix(float matrix[][])
+    public static int predict(float[][] image) {
+        EmnistImage emnistImage = new EmnistImage(-1, image);
+        return network.predict(emnistImage);
+	}
+
+    // public static void printMatrix(float matrix[][])
     // {
     //     for (int i = 0; i < matrix.length; i++){
 	// 		System.out.println();

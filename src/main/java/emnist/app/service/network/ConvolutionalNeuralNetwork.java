@@ -112,6 +112,11 @@ public class ConvolutionalNeuralNetwork implements Consumer<EmnistData> {
         }
     }
 
+    public int predict(EmnistImage emnistImage) {
+        float[][] outputLayer = this.forwards(emnistImage.image);
+        return Vector.getVectorArrayMaximumIndex(outputLayer);
+    }
+
     private TestingResult test(int steps, EmnistImage[] images) {
         int numCorrect = 0;
         int lossTotal = 0;
@@ -121,7 +126,7 @@ public class ConvolutionalNeuralNetwork implements Consumer<EmnistData> {
             int label = emnistImage.label;
 
             // FORWARD PROPAGATE
-            float[][] outputLayer = this.forwards(image, label);
+            float[][] outputLayer = this.forwards(image);
 
             // CALCULATE CROSS-ENTROPY LOSS AND ACCURACY
             double loss = Math.log(outputLayer[0][label]);
@@ -142,7 +147,7 @@ public class ConvolutionalNeuralNetwork implements Consumer<EmnistData> {
             int label = emnistImage.label;
             
             // FORWARD PROPAGATE
-            float[][] outputLayer = this.forwards(image, label);
+            float[][] outputLayer = this.forwards(image);
 
             // CALCULATE CROSS-ENTROPY LOSS AND ACCURACY
             double loss = Math.log(outputLayer[0][label]);
@@ -161,7 +166,7 @@ public class ConvolutionalNeuralNetwork implements Consumer<EmnistData> {
         return new TrainingResult(accuracy, loss);
     }
 
-    private float[][] forwards(float[][] image, int label) {
+    private float[][] forwards(float[][] image) {
         // KERNAL LAYER  [8] x [26] x [26]
         float[][][] filterLayer = convolution.propagateForwards(image);
         // POOLING LAYER [8] x [13] x [13]
@@ -170,7 +175,7 @@ public class ConvolutionalNeuralNetwork implements Consumer<EmnistData> {
         return softMax.propagateForwards(poolingLayer);
     }
 
-    private void backwards(float[][] outputLayer, Integer label, Float learningRate) {
+    private void backwards(float[][] outputLayer, int label, Float learningRate) {
         float[][] gradient = Vector.getVectorArrayOfZero(10);
         gradient[0][label] = -1 / outputLayer[0][label];
         float[][][] softMax_gradient = softMax.propagateBackwards(gradient, learningRate);

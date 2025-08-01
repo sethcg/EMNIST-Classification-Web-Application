@@ -11,10 +11,9 @@
       const message = JSON.parse(event.data);
       console.log(message);
     });
-    fetch('/api/train')
+    fetch('/api/train', { method: 'POST' })
       .then((response) => response.text())
-      .then((data) => {
-        console.log('TRAINING COMPLETE');
+      .then(() => {
         disableTesting.value = false;
         eventSource.close();
       });
@@ -27,12 +26,9 @@
       const message = JSON.parse(event.data);
       console.log(message);
     });
-    fetch('/api/test')
+    fetch('/api/test', { method: 'POST' })
       .then((response) => response.text())
-      .then((data) => {
-        console.log('TESTING COMPLETE');
-        eventSource.close();
-      });
+      .then(() => eventSource.close());
   }
 </script>
 
