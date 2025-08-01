@@ -1,10 +1,15 @@
 <script setup>
   import { ref } from 'vue';
 
-  const msg = ref('');
-  const disableTesting = ref(true);
+  const emit = defineEmits(['update:hasNetwork']);
+  const props = defineProps({
+    hasNetwork: Boolean,
+  });
 
-  function train(event) {
+  const inProgress = ref(false);
+
+  const train = () => {
+    inProgress.value = true;
     const eventSource = new EventSource('/api/notification');
     eventSource.onerror = (error) => console.error('Connection error:', error);
     eventSource.addEventListener('trainingUpdate', (event) => {
@@ -14,12 +19,14 @@
     fetch('/api/train', { method: 'POST' })
       .then((response) => response.text())
       .then(() => {
-        disableTesting.value = false;
+        inProgress.value = false;
         eventSource.close();
+        emit('update:hasNetwork', true);
       });
-  }
+  };
 
-  function test(event) {
+  const test = () => {
+    inProgress.value = true;
     const eventSource = new EventSource('/api/notification');
     eventSource.onerror = (error) => console.error('Connection error:', error);
     eventSource.addEventListener('testingUpdate', (event) => {
@@ -28,17 +35,19 @@
     });
     fetch('/api/test', { method: 'POST' })
       .then((response) => response.text())
-      .then(() => eventSource.close());
-  }
+      .then(() => {
+        inProgress.value = false;
+        eventSource.close();
+      });
+  };
 </script>
 
 <template>
-  <div class="flex flex-col gap-2 my-2">
+  <div class="flex flex-col gap-2">
     <div class="flex flex-row gap-2">
-      <button class="flex flex-row items-center py-2 px-4" @click="train">TRAIN</button>
-      <button class="flex flex-row items-center py-2 px-4" @click="test" :disabled="disableTesting">TEST</button>
+      <button class="flex flex-row items-center py-1 px-3" @click="train" :disabled="inProgress">TRAIN</button>
+      <button class="flex flex-row items-center py-1 px-3" @click="test" :disabled="inProgress">TEST</button>
     </div>
-    <h1 class="text-xl font-bold">{{ msg }}</h1>
   </div>
 </template>
 
