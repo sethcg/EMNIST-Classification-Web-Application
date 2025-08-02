@@ -25,14 +25,12 @@ public class EmnistData {
     }
 
     public static class EmnistBatch {
-        public int rows;
         public int epochNum;
         public int batchNum;
         public EmnistImage[] images;
         public boolean isLastBatch = false;
 
-        public EmnistBatch(int rows, int epochNum, int batchNum, EmnistImage[] images, boolean isLastBatch) {
-            this.rows = rows;
+        public EmnistBatch(int epochNum, int batchNum, EmnistImage[] images, boolean isLastBatch) {
             this.epochNum = epochNum;
             this.batchNum = batchNum;
             this.images = images;

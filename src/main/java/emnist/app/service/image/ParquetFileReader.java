@@ -51,7 +51,6 @@ public class ParquetFileReader {
             try (   CDataDictionaryProvider consumerDictionaryProvider = new CDataDictionaryProvider();
                     VectorSchemaRoot consumerRoot = Data.importVectorSchemaRoot(allocator, consumerArrowSchema, consumerDictionaryProvider)) {
                         
-                int rows = 0;
                 int epochNum = 1;
                 int batchNum = 1;
                 int indexOffset = 0;
@@ -81,13 +80,12 @@ public class ParquetFileReader {
                             images[i + indexOffset] = new EmnistImage(label, pixelMatrix);
                         }
 
-                        rows += rowCount;
                         indexOffset += rowCount;
                         
                         // PROCESS BATCH, AND RESET BATCHING PROCESS
                         if(indexOffset >= EmnistData.batchSize) {                     
                             boolean isLastBatch = batchNum == TOTAL_BATCH_NUM;
-                            emnistData.emnistBatch = new EmnistBatch(rows, epochNum, batchNum, images, isLastBatch);
+                            emnistData.emnistBatch = new EmnistBatch(epochNum, batchNum, images, isLastBatch);
                             processData.accept(emnistData);
 
                             if(batchNum / (EmnistData.epochSize / EmnistData.batchSize) >= 1) {

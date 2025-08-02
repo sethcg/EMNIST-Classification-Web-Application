@@ -6,10 +6,13 @@ import emnist.app.service.helper.FileManagement;
 import emnist.app.service.helper.Vector;
 import emnist.app.service.image.EmnistData;
 import emnist.app.service.image.EmnistData.EmnistImage;
+import emnist.app.service.network.layer.Convolution;
+import emnist.app.service.network.layer.MaxPooling;
+import emnist.app.service.network.layer.SoftMax;
 import emnist.app.service.notification.Notification;
 import emnist.app.service.notification.NotificationService;
 
-public class ConvolutionalNeuralNetwork implements Consumer<EmnistData> {
+public class Network implements Consumer<EmnistData> {
 
     private static final int INPUT_LAYER_SIZE = 13 * 13 * 8;
     private static final int OUTPUT_LAYER_SIZE = 10;
@@ -18,93 +21,73 @@ public class ConvolutionalNeuralNetwork implements Consumer<EmnistData> {
     private Convolution convolution;
     private MaxPooling maxPooling;
     private SoftMax softMax;
+    
+    public NetworkStats stats;
 
-    public ConvolutionalNeuralNetwork() {
-        this.convolution = new Convolution();
+    public Network() {
+        this.convolution = new Convolution(false);
         this.maxPooling = new MaxPooling();
-        this.softMax = new SoftMax(INPUT_LAYER_SIZE, OUTPUT_LAYER_SIZE);
+        this.softMax = new SoftMax(false, INPUT_LAYER_SIZE, OUTPUT_LAYER_SIZE);
+        this.stats = new NetworkStats();
     }
 
-    private class TrainingResult {
-        private double accuracy;
-        private double loss;
+    private class BatchResult {
+        private double accuracy, loss = 0.0f;
 
-        private TrainingResult(double accuracy, double loss) {
+        private BatchResult(double accuracy, double loss) {
             this.accuracy = accuracy;
             this.loss = loss;
         }
     }
 
-    private class TestingResult {
-        private int numCorrect;
-        private double loss;
-
-        private TestingResult(int numCorrect, double loss) {
-            this.numCorrect = numCorrect;
-            this.loss = loss;
-        }
+    public void reset() {
+        this.convolution = new Convolution(true);
+        this.maxPooling = new MaxPooling();
+        this.softMax = new SoftMax(true, INPUT_LAYER_SIZE, OUTPUT_LAYER_SIZE);
+        this.stats = new NetworkStats();
     }
-        
+
     @Override
     public void accept(EmnistData data) {
-        int rows = data.emnistBatch.rows;
         int epochNum = data.emnistBatch.epochNum;
         int batchNum = data.emnistBatch.batchNum;
 
         EmnistImage[] images = data.emnistBatch.images;
-        int steps = rows / batchNum;
-
         Notification notification = new Notification(epochNum, batchNum);
 
         switch(data.dataType) {
             case TRAIN:
-                // DEBUG
-                // String batchMessage = String.format("%-10s", ("Batch[" + batchNum + "]:"));
+                BatchResult trainingResult = this.train(images);
 
-                TrainingResult result = this.train(steps, images);
-
-                // DEBUG
-                // batchMessage += " (Step: " + steps + ")";
-                // batchMessage += " Loss: " + String.format("%.2f", result.loss);
-                // batchMessage += " Accuracy: " + String.format("%.1f", result.accuracy) + "%";
-                // System.out.println(batchMessage);
-
-                notification.steps = steps;
                 notification.batchNum = batchNum;
-                notification.loss = String.format("%.2f", result.loss);
-                notification.accuracy = String.format("%.1f", result.accuracy) + "%";
+                notification.steps = data.emnistBatch.images.length;
+                notification.loss = String.format("%.2f", trainingResult.loss);
+                notification.accuracy = String.format("%.1f", trainingResult.accuracy) + "%";
                 NotificationService.sendNotification("trainingUpdate", notification);
+
+                // AVERAGE NETWORK STATISTICS
+                stats.imageNum += data.emnistBatch.images.length;
+                stats.accuracy = batchNum > 1 ? (stats.accuracy + trainingResult.accuracy) / 2.0f : trainingResult.accuracy;
+                stats.loss = batchNum > 1 ? (stats.loss + trainingResult.loss) / 2.0f : trainingResult.loss;
 
                 if(data.emnistBatch.isLastBatch) {
                     // AFTER TRAINING IS DONE SAVE THE FILTERS, WEIGHTS, BIAS FOR LATER USE
                     FileManagement.Filters.saveMatrix(convolution.cachedFilters);
                     FileManagement.Weights.saveMatrix(softMax.cachedWeights);
                     FileManagement.Bias.saveMatrix(softMax.cachedBias);
+
+                    stats.hasNetwork = true;
+                    FileManagement.Statistics.saveStatistics(stats);
                 }
                 break;
             case TEST:
-                double loss = 0;
-                int numCorrect = 0;
+                BatchResult testingResult = this.test(images);
 
-                // DEBUG
-                // String batchMessage = String.format("%-10s", ("Batch[" + batchNum + "]:"));
+                double averageAccuracy = batchNum > 1 ? (stats.accuracy + testingResult.accuracy) / 2.0f : testingResult.accuracy;
+                double averageLoss = batchNum > 1 ? (stats.loss + testingResult.loss) / 2.0f : testingResult.loss;
 
-                TestingResult testingResult = this.test(steps, images);
-
-                loss += testingResult.loss;
-                numCorrect += testingResult.numCorrect;
-
-                double averageLoss = loss / (double) steps;
-                double averageAccuracy = ((double) numCorrect / (double) steps) * 100.0f;
-
-                // DEBUG
-                // batchMessage += " (Step: " + steps + ")";
-                // batchMessage += " Avg Loss: " + String.format("%.2f", averageLoss) + "%";
-                // batchMessage += " Avg Accuracy: " + String.format("%.1f", averageAccuracy) + "%";
-                // System.out.println(batchMessage);
-
-                notification.steps = steps;
                 notification.batchNum = batchNum;
+                notification.steps = data.emnistBatch.images.length;
                 notification.loss = String.format("%.2f", averageLoss);
                 notification.accuracy = String.format("%.1f", averageAccuracy) + "%";
                 NotificationService.sendNotification("testingUpdate", notification);
@@ -117,8 +100,8 @@ public class ConvolutionalNeuralNetwork implements Consumer<EmnistData> {
         return Vector.getVectorArrayMaximumIndex(outputLayer);
     }
 
-    private TestingResult test(int steps, EmnistImage[] images) {
-        int numCorrect = 0;
+    private BatchResult test(EmnistImage[] images) {
+        int accurateTotal = 0;
         int lossTotal = 0;
 
         for(EmnistImage emnistImage: images) {
@@ -132,13 +115,17 @@ public class ConvolutionalNeuralNetwork implements Consumer<EmnistData> {
             double loss = Math.log(outputLayer[0][label]);
             int accurate = label == Vector.getVectorArrayMaximumIndex(outputLayer) ? 1 : 0;
       
-            numCorrect += accurate;
+            accurateTotal += accurate;
             lossTotal += loss;
         }
-        return new TestingResult(numCorrect, lossTotal);
+
+        double loss = lossTotal / (double) images.length;
+        double accuracy = ((double) accurateTotal / (double) images.length) * 100.0f;
+
+        return new BatchResult(accuracy, loss);
     }
 
-    private TrainingResult train(int steps, EmnistImage[] images) {
+    private BatchResult train(EmnistImage[] images) {
         int accurateTotal = 0;
         int lossTotal = 0;
 
@@ -152,7 +139,7 @@ public class ConvolutionalNeuralNetwork implements Consumer<EmnistData> {
             // CALCULATE CROSS-ENTROPY LOSS AND ACCURACY
             double loss = Math.log(outputLayer[0][label]);
             int accurate = label == Vector.getVectorArrayMaximumIndex(outputLayer) ? 1 : 0;
-      
+
             // BACKWARD PROPAGATE
             this.backwards(outputLayer, label, LEARNING_RATE);
 
@@ -160,10 +147,10 @@ public class ConvolutionalNeuralNetwork implements Consumer<EmnistData> {
             lossTotal += loss;
         }
 
-        double accuracy = (double)((accurateTotal * 100.0f) / steps);
-        double loss = lossTotal / 100.0;
+        double loss = lossTotal / (double) images.length;
+        double accuracy = ((double) accurateTotal / (double) images.length) * 100.0f;
 
-        return new TrainingResult(accuracy, loss);
+        return new BatchResult(accuracy, loss);
     }
 
     private float[][] forwards(float[][] image) {

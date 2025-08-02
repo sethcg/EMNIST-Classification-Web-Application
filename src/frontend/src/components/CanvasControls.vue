@@ -4,7 +4,7 @@
 
   const emit = defineEmits(['update:eraser']);
   const props = defineProps({
-    eraser: Boolean
+    eraser: Boolean,
   });
 
   const isDrawActive = ref(true);
@@ -16,7 +16,6 @@
     isEraseActive.value = enableErase;
     emit('update:eraser', enableErase);
   };
-
 </script>
 
 <template>
@@ -55,7 +54,7 @@
   button {
     border-radius: 8px;
     border: 2px solid transparent;
-    background-color: var(--color-slate-900);
+    background-color: var(--color-neutral-900);
     cursor: pointer;
     transition: border-color 0.25s;
   }

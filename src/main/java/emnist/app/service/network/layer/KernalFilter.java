@@ -1,4 +1,4 @@
-package emnist.app.service.network;
+package emnist.app.service.network.layer;
 
 public class KernalFilter {
 

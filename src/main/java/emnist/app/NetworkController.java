@@ -1,5 +1,6 @@
 package emnist.app;
 
+import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -28,6 +29,11 @@ public class NetworkController {
     @PostMapping(value = "predict", consumes = MediaType.APPLICATION_JSON_VALUE)
     public int predict(@RequestBody float[][] image) {
         return NetworkService.predict(image);
+    }
+
+    @PostMapping(value = "stats", produces = MediaType.APPLICATION_JSON_VALUE)
+    public HashMap<String, String> stats() {
+        return NetworkService.getNetworkStatistics().getMappedObject();
     }
 
     @GetMapping(value = "notification", produces = MediaType.TEXT_EVENT_STREAM_VALUE)

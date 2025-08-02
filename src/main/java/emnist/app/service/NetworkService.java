@@ -1,11 +1,12 @@
 package emnist.app.service;
 
+import emnist.app.service.helper.FileManagement;
 import emnist.app.service.image.EmnistData;
-import emnist.app.service.image.ParquetFileReader;
-
 import emnist.app.service.image.EmnistData.EmnistEnum;
 import emnist.app.service.image.EmnistData.EmnistImage;
-import emnist.app.service.network.ConvolutionalNeuralNetwork;
+import emnist.app.service.image.ParquetFileReader;
+import emnist.app.service.network.Network;
+import emnist.app.service.network.NetworkStats;
 
 public class NetworkService {
 
@@ -14,11 +15,14 @@ public class NetworkService {
     private static final String TRAINING_DATA_URI = "file:/" + DATA_DIRECTORY + "train.parquet";
     private static final String TESTING_DATA_URI = "file:/" + DATA_DIRECTORY + "test.parquet";
 
-    private static final ConvolutionalNeuralNetwork network = new ConvolutionalNeuralNetwork();
+    private static final Network network = new Network();
 
 	public static void train() {
         EmnistData.epochSize = 60000;
         EmnistData emnistData = new EmnistData(EmnistEnum.TRAIN);
+
+        // RESET THE NETWORK SAVED FILTER, WEIGHT, BIAS DATA
+        network.reset();
 
         ParquetFileReader reader = new ParquetFileReader();
         reader.read(TRAINING_DATA_URI, 1, emnistData, network);
@@ -35,6 +39,18 @@ public class NetworkService {
     public static int predict(float[][] image) {
         EmnistImage emnistImage = new EmnistImage(-1, image);
         return network.predict(emnistImage);
+	}
+
+    public static NetworkStats getNetworkStatistics() {
+        if( FileManagement.Filters.hasFile() && 
+            FileManagement.Weights.hasFile() && 
+            FileManagement.Bias.hasFile() &&
+            FileManagement.Statistics.hasFile()) 
+        {
+            return FileManagement.Statistics.getObjectFromFile();
+        } else {
+            return new NetworkStats();
+        }
 	}
 
     // public static void printMatrix(float matrix[][])

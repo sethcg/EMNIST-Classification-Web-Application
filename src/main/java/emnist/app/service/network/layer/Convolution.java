@@ -1,4 +1,4 @@
-package emnist.app.service.network;
+package emnist.app.service.network.layer;
 
 import java.util.Random;
 
@@ -14,15 +14,15 @@ public class Convolution {
 
     public float[][][] cachedFilters;
 
-    private float[][][] getFilters() {
+    private float[][][] getFilters(boolean reset) {
         float[][][] filters = FileManagement.Filters.getMatrixFromFile();
-        return filters == null 
+        return reset || filters == null
             ? initializeFilters(8, 3, 3)
             : filters;
     }
 
-    public Convolution(){
-        this.cachedFilters = getFilters();
+    public Convolution(boolean reset) {
+        this.cachedFilters = getFilters(reset);
     }
 
     private static float[][][] initializeFilters(int kernalSize, int width, int height) {

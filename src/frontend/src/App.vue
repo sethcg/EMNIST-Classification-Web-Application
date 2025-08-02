@@ -14,7 +14,10 @@
         <DrawingCanvas v-model:prediction="prediction" />
       </div>
       <div class="max-w-[320px] max-h-[560px] grow">
-        <Network v-model:prediction="prediction" />
+        <Suspense>
+          <Network v-model:prediction="prediction" />
+          <template #fallback></template>
+        </Suspense>
       </div>
     </div>
   </div>

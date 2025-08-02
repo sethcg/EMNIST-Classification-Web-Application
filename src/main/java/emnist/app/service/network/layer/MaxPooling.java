@@ -1,4 +1,4 @@
-package emnist.app.service.network;
+package emnist.app.service.network.layer;
 
 import emnist.app.service.helper.FunctionHelper;
 import emnist.app.service.helper.FunctionHelper.Function;

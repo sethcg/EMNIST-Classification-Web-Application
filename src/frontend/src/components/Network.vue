@@ -1,5 +1,5 @@
 <script setup>
-  import { onMounted, ref } from 'vue';
+  import { ref } from 'vue';
   import { Icon } from '@iconify/vue';
 
   import NetworkControls from './NetworkControls.vue';
@@ -8,22 +8,31 @@
     prediction: Number | null,
   });
 
-  const hasNetwork = ref(true);
-  const accuracy = ref(0);
-  const loss = ref(0);
+  const hasNetwork = ref(false);
   const imageNum = ref(0);
+  const accuracy = ref("0.0");
+  const loss = ref("0.0");
 
-  // ON MOUNT CHECK FOR SAVED NETWORK
-  onMounted(() => {
-    fetch('/api/mount', { method: 'POST' })
+  // GET NETWORK, AND STATISTICS IF APPLICABLE
+  const getTrainingResults = async () => {
+    await fetch('/api/stats', { method: 'POST' })
       .then((response) => response.text())
-      .then((data) => {
-        hasNetwork.value = true;
+      .then((json) => {
+        const data = JSON.parse(json);
+        hasNetwork.value = String(data.hasNetwork).toLowerCase() === 'true';
+        if (hasNetwork.value) {
+          imageNum.value = Number.parseInt(data.imageNum);
+          accuracy.value = Number.parseFloat(data.accuracy).toFixed(2);
+          loss.value = Number.parseFloat(data.loss).toFixed(2);
+        }
       })
-      .catch((error) => {
-        // hasNetwork.value = false;
+      .catch((_error) => {
+        hasNetwork.value = false;
       });
-  });
+  };
+
+  // INITIALIZE THE TRAINING RESULTS, IF ANY
+  await getTrainingResults();
 </script>
 
 <template>
@@ -33,6 +42,8 @@
         <p class="font-bold text-xl">Status</p>
       </div>
 
+      <hr class="my-[6px] py-[2px] text-neutral-300 bg-neutral-300"/>
+      
       <div v-if="hasNetwork">
         <div class="mb-6">
           <div class="flex flex-row grow items-center py-2 px-4 gap-4 bg-lime-900/80 rounded-lg" role="alert">
@@ -46,25 +57,28 @@
         <!-- NETWORK STATISTICS -->
         <div class="mb-6">
           <div class="flex flex-row">
-            <span class="font-bold text-xl">Statistics</span>
+            <span class="font-bold text-xl">Training Results</span>
           </div>
+
+          <hr class="my-[6px] py-[2px] text-neutral-300 bg-neutral-300"/>
+
           <ul class="flex flex-col gap-[2px] ml-4 list-none">
             <li>
               <div class="flex flex-row gap-2">
                 <span class="font-semibold">Accuracy:</span>
-                <span>{{ accuracy }}%</span>
+                <span class="font-normal">{{ accuracy }}%</span>
               </div>
             </li>
             <li>
               <div class="flex flex-row gap-2">
                 <span class="font-semibold">Loss:</span>
-                <span>{{ loss }}</span>
+                <span class="font-normal">{{ loss }}</span>
               </div>
             </li>
             <li>
               <div class="flex flex-row gap-2">
                 <span class="font-semibold">Training Images Used:</span>
-                <span>{{ imageNum }}</span>
+                <span class="font-normal">{{ imageNum }}</span>
               </div>
             </li>
           </ul>
@@ -85,7 +99,7 @@
         </div>
       </div>
     </div>
-    <NetworkControls v-model:hasNetwork="hasNetwork" />
+    <NetworkControls @trainingComplete="getTrainingResults" v-model:hasNetwork="hasNetwork"/>
   </div>
 </template>
 

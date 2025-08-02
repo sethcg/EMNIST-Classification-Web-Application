@@ -1,4 +1,4 @@
-package emnist.app.service.network;
+package emnist.app.service.network.layer;
 
 import emnist.app.service.helper.FileManagement;
 import emnist.app.service.helper.Matrix;
@@ -12,23 +12,23 @@ public class SoftMax {
     public float[][] flattenedInput;
     public float[][] softMaxTotals;
 
-    private float[][] getBias() {
+    private float[][] getBias(boolean reset) {
         float[][] bias = FileManagement.Bias.getMatrixFromFile();
-        return bias == null 
+        return reset || bias == null 
             ? Vector.getVectorArrayOfZero(10) 
             : bias;
     }
 
-    private float[][] getWeights(int input, int output) {
+    private float[][] getWeights(boolean reset, int input, int output) {
         float[][] weights = FileManagement.Weights.getMatrixFromFile();
-        return weights == null 
+        return reset || weights == null 
             ? Matrix.getElementWiseScaling(Matrix.getRandomizedMatrix(input, output), 1.0f / input) 
             : weights;
     }
 
-    public SoftMax(int input, int output) {
-        cachedWeights = getWeights(input, output);
-        cachedBias = getBias();
+    public SoftMax(boolean reset, int input, int output) {
+        cachedWeights = getWeights(reset, input, output);
+        cachedBias = getBias(reset);
     }
 
     public float[][] propagateForwards(float[][][] input) {
