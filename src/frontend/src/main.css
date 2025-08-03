@@ -1,0 +1,6 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/roboto-flex';
+
+@theme {
+  --font-roboto: 'Roboto Flex Variable', 'monospace';
+}

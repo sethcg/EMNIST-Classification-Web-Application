@@ -14,7 +14,8 @@
   const disabledTest = ref(!props.hasNetwork);
 
   const train = () => {
-    disabledTrain.value, disabledTest.value = true;
+    disabledTrain.value = true;
+    disabledTest.value = true;
     const eventSource = new EventSource('/api/notification');
     eventSource.onerror = (error) => console.error('Connection error:', error);
     eventSource.addEventListener('trainingUpdate', (event) => {
@@ -26,12 +27,14 @@
       .then(() => {
         emit('trainingComplete');
         eventSource.close();
-        disabledTrain.value, disabledTest.value = false;
+        disabledTrain.value = false;
+        disabledTest.value = false;
       });
   };
 
   const test = () => {
-    disabledTrain.value, disabledTest.value = true;
+    disabledTrain.value = true;
+    disabledTest.value = true;
     const eventSource = new EventSource('/api/notification');
     eventSource.onerror = (error) => console.error('Connection error:', error);
     eventSource.addEventListener('testingUpdate', (event) => {
@@ -42,7 +45,8 @@
       .then((response) => response.text())
       .then(() => {
         eventSource.close();
-        disabledTrain.value, disabledTest.value = false;
+        disabledTrain.value = false;
+        disabledTest.value = false;
       });
   };
 </script>

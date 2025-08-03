@@ -10,8 +10,8 @@
 
   const hasNetwork = ref(false);
   const imageNum = ref(0);
-  const accuracy = ref("0.0");
-  const loss = ref("0.0");
+  const accuracy = ref('0.0');
+  const loss = ref('0.0');
 
   // GET NETWORK, AND STATISTICS IF APPLICABLE
   const getTrainingResults = async () => {
@@ -42,8 +42,8 @@
         <p class="font-bold text-xl">Status</p>
       </div>
 
-      <hr class="my-[6px] py-[2px] text-neutral-300 bg-neutral-300"/>
-      
+      <hr class="my-[6px] py-[2px] text-neutral-300 bg-neutral-300" />
+
       <div v-if="hasNetwork">
         <div class="mb-6">
           <div class="flex flex-row grow items-center py-2 px-4 gap-4 bg-lime-900/80 rounded-lg" role="alert">
@@ -60,7 +60,7 @@
             <span class="font-bold text-xl">Training Results</span>
           </div>
 
-          <hr class="my-[6px] py-[2px] text-neutral-300 bg-neutral-300"/>
+          <hr class="my-[6px] py-[2px] text-neutral-300 bg-neutral-300" />
 
           <ul class="flex flex-col gap-[2px] ml-4 list-none">
             <li>
@@ -99,7 +99,7 @@
         </div>
       </div>
     </div>
-    <NetworkControls @trainingComplete="getTrainingResults" v-model:hasNetwork="hasNetwork"/>
+    <NetworkControls @trainingComplete="getTrainingResults" v-model:hasNetwork="hasNetwork" />
   </div>
 </template>
 
