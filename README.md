@@ -5,12 +5,21 @@
 
 ```bash
 
+# WINDOWS SETUP/INSTALL
+mvnw.cmd clean install
+
+# MAC/LINUX SETUP/INSTALL
+./mvnw clean install
+
 # RUN DEVELOPMENT SERVER (http://localhost:8080)
 mvn spring-boot:run &
 
 ```
 
 ## Packaging:
+
+<details close>
+<summary>Show</summary>
 
 ```bash
 
@@ -21,3 +30,5 @@ mvn clean package
 mvn clean package -DskipTests
 
 ```
+
+</details>

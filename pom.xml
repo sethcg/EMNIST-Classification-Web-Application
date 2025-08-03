@@ -7,13 +7,14 @@
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>3.5.4</version>
-		<relativePath /> <!-- lookup parent from repository -->
+		<relativePath />
 	</parent>
 	<groupId>com.github.sethcg</groupId>
 	<artifactId>emnist-application</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>emnist-application</name>
-	<description>Spring Boot EMNIST digit prediction backend</description>
+	<description>EMNIST Predition Application</description>
+	
 	<properties>
 		<java.version>21</java.version>
 		<node.version>v22.14.0</node.version>
@@ -23,6 +24,7 @@
 		<maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
+
 	<dependencies>
 		<!-- SPRING BOOT -->
 		<dependency>
@@ -58,7 +60,7 @@
             <scope>runtime</scope>
         </dependency>
 
-		<!-- COPY FRONT END -->
+		<!-- BUILD/COPY FRONTEND APPLICATION -->
 		<dependency>
 			<groupId>com.github.eirslett</groupId>
 			<artifactId>frontend-maven-plugin</artifactId>
@@ -84,7 +86,7 @@
 				<version>${frontend-maven-plugin.version}</version>
 				<executions>
 					<execution>
-						<id>Install node and npm</id>
+						<id>install-node-and-npm</id>
 						<goals>
 							<goal>install-node-and-npm</goal>
 						</goals>
@@ -96,7 +98,7 @@
 					</execution>
 
 					<execution>
-						<id>npm install</id>
+						<id>npm-install</id>
 						<goals>
 							<goal>npm</goal>
 						</goals>
@@ -107,7 +109,7 @@
 					</execution>
 
 					<execution>
-						<id>npm build</id>
+						<id>npm-build</id>
 						<goals>
 							<goal>npm</goal>
 						</goals>
@@ -130,7 +132,7 @@
 				<version>${maven-resources-plugin.version}</version>
 				<executions>
 					<execution>
-						<id>Copy frontend into Spring Boot target static folder</id>
+						<id>copy-frontend-to-static-folder</id>
 						<phase>process-resources</phase>
 						<goals>
 							<goal>copy-resources</goal>
