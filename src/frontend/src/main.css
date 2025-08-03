@@ -1,6 +1,8 @@
 @import 'tailwindcss';
 @import '@fontsource-variable/roboto-flex';
+@import '@fontsource-variable/rubik';
 
 @theme {
-  --font-roboto: 'Roboto Flex Variable', 'monospace';
+  --font-roboto: 'Roboto Flex Variable', sans-serif;
+  --font-rubik: 'Rubik Variable', sans-serif;
 }

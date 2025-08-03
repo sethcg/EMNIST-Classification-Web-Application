@@ -39,10 +39,10 @@
   <div class="flex flex-col size-full justify-between">
     <div class="flex flex-col grow gap-2">
       <div class="flex flex-row">
-        <p class="font-bold text-xl">Status</p>
+        <p class="font-bold font-rubik text-xl">STATUS</p>
       </div>
 
-      <hr class="my-[6px] py-[2px] text-neutral-300 bg-neutral-300" />
+      <hr class="mb-[6px] py-[2px] text-neutral-300 bg-neutral-300" />
 
       <div v-if="hasNetwork">
         <div class="mb-6">
@@ -50,14 +50,14 @@
             <span class="flex justify-center items-center size-[32px] p-1 bg-lime-700/70 rounded-full">
               <Icon icon="fa-solid:check" class="text-lime-300 text-[20px]" />
             </span>
-            <span class="text-md text-lime-200 font-bold">Network ready for testing</span>
+            <span class="text-lg text-lime-200 font-medium">Network ready for testing</span>
           </div>
         </div>
 
         <!-- NETWORK STATISTICS -->
         <div class="mb-6">
           <div class="flex flex-row">
-            <span class="font-bold text-xl">Training Results</span>
+            <span class="font-bold font-rubik text-xl">TRAINING RESULTS</span>
           </div>
 
           <hr class="my-[6px] py-[2px] text-neutral-300 bg-neutral-300" />
@@ -65,20 +65,20 @@
           <ul class="flex flex-col gap-[2px] ml-4 list-none">
             <li>
               <div class="flex flex-row gap-2">
-                <span class="font-semibold">Accuracy:</span>
-                <span class="font-normal">{{ accuracy }}%</span>
+                <span class="text-lg font-medium font-rubik">Accuracy:</span>
+                <span class="self-center text-md font-normal">{{ accuracy }}%</span>
               </div>
             </li>
             <li>
               <div class="flex flex-row gap-2">
-                <span class="font-semibold">Loss:</span>
-                <span class="font-normal">{{ loss }}</span>
+                <span class="text-lg font-medium font-rubik">Loss:</span>
+                <span class="self-center text-md font-normal">{{ loss }}</span>
               </div>
             </li>
             <li>
               <div class="flex flex-row gap-2">
-                <span class="font-semibold">Training Images Used:</span>
-                <span class="font-normal">{{ imageNum }}</span>
+                <span class="text-lg font-medium font-rubik">Training Images:</span>
+                <span class="self-center text-md font-normal">{{ imageNum }}</span>
               </div>
             </li>
           </ul>
@@ -86,8 +86,8 @@
 
         <!-- NETWORK PREDICTION -->
         <div class="flex flex-row gap-2">
-          <p class="font-bold text-xl">Prediction:</p>
-          <p class="font-bold text-xl">{{ props.prediction }}</p>
+          <p class="font-bold font-rubik text-xl">PREDICTION:</p>
+          <p class="font-bold font-rubik text-xl">{{ props.prediction }}</p>
         </div>
       </div>
       <div v-else>
@@ -95,7 +95,7 @@
           <span class="flex justify-center items-center size-[32px] p-1 bg-orange-500/70 rounded-full">
             <Icon icon="fa-solid:exclamation" class="text-orange-300 text-[20px]" />
           </span>
-          <span class="text-md text-orange-200 font-extrabold">Network not found</span>
+          <span class="text-lg text-orange-200 font-medium">Network not found</span>
         </div>
       </div>
     </div>
