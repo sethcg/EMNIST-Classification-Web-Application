@@ -4,6 +4,7 @@
   import Network from './components/Network.vue';
 
   const prediction = ref(null);
+  const hasNetwork = ref(false);
 </script>
 
 <template>
@@ -11,11 +12,14 @@
     <div class="py-4 font-bold font-rubik text-4xl">CONVOLUTIONAL NEURAL NETWORK</div>
     <div class="flex flex-row gap-[20px] size-full justify-center">
       <div class="max-w-[1280px]">
-        <DrawingCanvas v-model:prediction="prediction" />
+        <Suspense>
+          <DrawingCanvas v-model:prediction="prediction" v-model:hasNetwork="hasNetwork" />
+          <template #fallback></template>
+        </Suspense>
       </div>
       <div class="max-w-[320px] max-h-[560px] grow">
         <Suspense>
-          <Network v-model:prediction="prediction" />
+          <Network v-model:prediction="prediction" v-model:hasNetwork="hasNetwork" />
           <template #fallback></template>
         </Suspense>
       </div>

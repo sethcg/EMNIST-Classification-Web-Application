@@ -1,12 +1,11 @@
 <script setup>
   import { ref } from 'vue';
 
-  const emit = defineEmits(['trainingComplete']);
+  const emit = defineEmits(['trainingComplete', 'testingComplete']);
   const props = defineProps({
     hasNetwork: {
       type: Boolean,
       required: true,
-      default: false,
     },
   });
 
@@ -44,6 +43,7 @@
     fetch('/api/test', { method: 'POST' })
       .then((response) => response.text())
       .then(() => {
+        emit('testingComplete');
         eventSource.close();
         disabledTrain.value = false;
         disabledTest.value = false;

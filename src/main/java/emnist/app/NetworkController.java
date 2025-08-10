@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -15,6 +17,18 @@ import emnist.app.service.notification.NotificationService;
 @RequestMapping("/api")
 @CrossOrigin
 public class NetworkController {
+
+    @Autowired
+    private Environment environment;
+
+    @PostMapping(value = "ping", produces = MediaType.TEXT_PLAIN_VALUE)
+    public String ping() {
+        StringBuilder string = new StringBuilder();
+        string.append("[Spring Boot Application info]");
+        string.append("\nName: " + environment.getProperty("application.name"));
+        string.append("\nVersion: " + environment.getProperty("application.version"));
+        return string.toString();
+    }
 
     @PostMapping("train")
     public void train() {

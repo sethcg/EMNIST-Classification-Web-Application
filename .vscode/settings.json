@@ -1,4 +1,7 @@
 {
     "java.compile.nullAnalysis.mode": "automatic",
-    "java.configuration.updateBuildConfiguration": "interactive"
+    "java.configuration.updateBuildConfiguration": "interactive",
+    
+    // IGNORE "UNKNOWN" PROPERTIES IN THE SPRING BOOT "application.properties" FILE
+    "spring-boot.ls.problem.application-properties.PROP_UNKNOWN_PROPERTY": "IGNORE"
 }

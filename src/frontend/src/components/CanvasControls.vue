@@ -4,7 +4,14 @@
 
   const emit = defineEmits(['update:eraser']);
   const props = defineProps({
-    eraser: Boolean,
+    eraser: {
+      type: Boolean,
+      required: true,
+    },
+    hasNetwork: {
+      type: Boolean,
+      required: true,
+    },
   });
 
   const isDrawActive = ref(true);
@@ -30,12 +37,12 @@
       <span class="hidden">REDO</span>
     </button>
 
-    <button id="DrawButton" class="flex flex-row items-center py-2 px-4" v-bind:class="{ active: isDrawActive }" @click.prevent="updateEraser($event)">
+    <button id="DrawButton" class="flex flex-row items-center py-2 px-4" :class="{ active: isDrawActive }" @click.prevent="updateEraser($event)">
       <Icon icon="lucide:pencil-line" class="text-[24px] pointer-events-none outline-none" />
       <span class="hidden">DRAW</span>
     </button>
 
-    <button id="EraseButton" class="flex flex-row items-center py-2 px-4" v-bind:class="{ active: isEraseActive }" @click.prevent="updateEraser($event)">
+    <button id="EraseButton" class="flex flex-row items-center py-2 px-4" :class="{ active: isEraseActive }" @click.prevent="updateEraser($event)">
       <Icon icon="lucide:eraser" class="text-[24px] pointer-events-none outline-none" />
       <span class="hidden">ERASE</span>
     </button>
@@ -48,17 +55,22 @@
 </template>
 
 <style scoped>
-  button.active {
-    border-color: var(--color-lime-600);
-  }
   button {
     border-radius: 8px;
     border: 2px solid transparent;
     background-color: var(--color-neutral-900);
     cursor: pointer;
     transition: border-color 0.25s;
+    opacity: 1;
   }
-  button:hover:not(.active) {
+  button.active {
+    border-color: var(--color-lime-600);
+  }
+  /* button.disabled {
+    opacity: 0.67;
+    cursor: default;
+  } */
+  button:hover:not(.active):and(.editable) {
     border-color: var(--color-teal-700);
   }
 </style>

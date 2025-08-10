@@ -1,12 +1,30 @@
 <script setup>
   import { ref, watch } from 'vue';
+  import { Icon } from '@iconify/vue';
 
   import VueDrawingCanvas from 'vue-drawing-canvas';
   import CanvasControls from './CanvasControls.vue';
 
+  // PING THE SERVER, TO ENSURE THERE IS A CONNECTION
+  await fetch('/api/ping', { method: 'POST' })
+    .then((response) => response.text())
+    .then((message) => {
+      console.log(message);
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+
   const emit = defineEmits(['update:prediction']);
   const props = defineProps({
-    prediction: Number | null,
+    prediction: {
+      type: Number,
+      required: true,
+    },
+    hasNetwork: {
+      type: Boolean,
+      required: true,
+    },
   });
 
   const DrawingCanvas = ref(null);
@@ -51,8 +69,8 @@
       .then((response) => response.text())
       .then((data) => {
         const digit = parseInt(data);
-        console.log(digit);
         if (!isNaN(digit)) {
+          console.log(digit);
           emit('update:prediction', digit);
         }
       });
@@ -62,24 +80,31 @@
 <template>
   <div class="size-full">
     <div class="grid place-items-center">
-      <VueDrawingCanvas
-        ref="DrawingCanvas"
-        v-model:image="image"
-        :eraser="eraser"
-        :lineWidth="lineWidth"
-        :lock="false"
-        :fill-shape="false"
-        :styles="{ border: 'solid 1px #000' }"
-        width="560"
-        height="560"
-        stroke-type="dash"
-        line-cap="round"
-        line-join="round"
-        color="white"
-        background-color="black"
-        saveAs="png" />
+      <div class="relative z-0">
+        <VueDrawingCanvas
+          ref="DrawingCanvas"
+          v-model:image="image"
+          :eraser="eraser"
+          :lineWidth="lineWidth"
+          :lock="false"
+          :fill-shape="false"
+          :styles="{ border: 'solid 1px #000' }"
+          width="560"
+          height="560"
+          stroke-type="dash"
+          line-cap="round"
+          line-join="round"
+          color="white"
+          background-color="black"
+          saveAs="png">
+        </VueDrawingCanvas>
+        <div v-if="!props.hasNetwork" class="absolute inset-0 flex justify-center items-center z-10 select-none">
+          <Icon icon="lucide:ban" class="blur-none text-red-800 text-[240px] pointer-events-none outline-none" />
+        </div>
+      </div>
+
       <canvas id="output" class="hidden"></canvas>
-      <CanvasControls v-model:eraser="eraser" />
+      <CanvasControls :eraser="eraser" :hasNetwork="!props.hasNetwork" />
     </div>
   </div>
 </template>
