@@ -22,13 +22,15 @@ public class Network implements Consumer<EmnistData> {
     private MaxPooling maxPooling;
     private SoftMax softMax;
     
-    public NetworkStats stats;
+    public NetworkStats trainingStats;
+    public NetworkStats testingStats;
 
     public Network() {
         this.convolution = new Convolution(false);
         this.maxPooling = new MaxPooling();
         this.softMax = new SoftMax(false, INPUT_LAYER_SIZE, OUTPUT_LAYER_SIZE);
-        this.stats = new NetworkStats();
+        this.trainingStats = new NetworkStats();
+        this.testingStats = new NetworkStats();
     }
 
     private class BatchResult {
@@ -44,7 +46,8 @@ public class Network implements Consumer<EmnistData> {
         this.convolution = new Convolution(true);
         this.maxPooling = new MaxPooling();
         this.softMax = new SoftMax(true, INPUT_LAYER_SIZE, OUTPUT_LAYER_SIZE);
-        this.stats = new NetworkStats();
+        this.trainingStats = new NetworkStats();
+        this.testingStats = new NetworkStats();
     }
 
     @Override
@@ -66,31 +69,36 @@ public class Network implements Consumer<EmnistData> {
                 NotificationService.sendNotification("trainingUpdate", notification);
 
                 // AVERAGE NETWORK STATISTICS
-                stats.imageNum += data.emnistBatch.images.length;
-                stats.accuracy = batchNum > 1 ? (stats.accuracy + trainingResult.accuracy) / 2.0f : trainingResult.accuracy;
-                stats.loss = batchNum > 1 ? (stats.loss + trainingResult.loss) / 2.0f : trainingResult.loss;
+                trainingStats.imageNum += data.emnistBatch.images.length;
+                trainingStats.accuracy = batchNum > 1 ? (trainingStats.accuracy + trainingResult.accuracy) / 2.0f : trainingResult.accuracy;
+                trainingStats.loss = batchNum > 1 ? (trainingStats.loss + trainingResult.loss) / 2.0f : trainingResult.loss;
 
                 if(data.emnistBatch.isLastBatch) {
-                    // AFTER TRAINING IS DONE SAVE THE FILTERS, WEIGHTS, BIAS FOR LATER USE
+                    // AFTER TRAINING IS DONE SAVE THE FILTERS, WEIGHTS, BIAS, AND STATISTICS FOR LATER USE
                     FileManagement.Filters.saveMatrix(convolution.cachedFilters);
                     FileManagement.Weights.saveMatrix(softMax.cachedWeights);
                     FileManagement.Bias.saveMatrix(softMax.cachedBias);
-
-                    stats.hasNetwork = true;
-                    FileManagement.Statistics.saveStatistics(stats);
+                    FileManagement.Statistics.saveStatistics(trainingStats, FileManagement.TRAINING_STATISTICS_FILENAME);
                 }
                 break;
             case TEST:
                 BatchResult testingResult = this.test(images);
 
-                double averageAccuracy = batchNum > 1 ? (stats.accuracy + testingResult.accuracy) / 2.0f : testingResult.accuracy;
-                double averageLoss = batchNum > 1 ? (stats.loss + testingResult.loss) / 2.0f : testingResult.loss;
-
                 notification.batchNum = batchNum;
                 notification.steps = data.emnistBatch.images.length;
-                notification.loss = String.format("%.2f", averageLoss);
-                notification.accuracy = String.format("%.1f", averageAccuracy) + "%";
+                notification.loss = String.format("%.2f", testingResult.loss);
+                notification.accuracy = String.format("%.1f", testingResult.accuracy) + "%";
                 NotificationService.sendNotification("testingUpdate", notification);
+
+                // AVERAGE NETWORK STATISTICS
+                testingStats.imageNum += data.emnistBatch.images.length;
+                testingStats.accuracy = batchNum > 1 ? (testingStats.accuracy + testingResult.accuracy) / 2.0f : testingResult.accuracy;
+                testingStats.loss = batchNum > 1 ? (testingStats.loss + testingResult.loss) / 2.0f : testingResult.loss;
+                
+                if(data.emnistBatch.isLastBatch) {
+                    // AFTER TESTING IS DONE SAVE THE STATISTICS
+                    FileManagement.Statistics.saveStatistics(testingStats, FileManagement.TESTING_STATISTICS_FILENAME);
+                }
                 break;
         }
     }

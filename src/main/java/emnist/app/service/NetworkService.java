@@ -1,5 +1,7 @@
 package emnist.app.service;
 
+import java.util.HashMap;
+
 import emnist.app.service.helper.FileManagement;
 import emnist.app.service.image.EmnistData;
 import emnist.app.service.image.EmnistData.EmnistEnum;
@@ -31,6 +33,9 @@ public class NetworkService {
     public static void test() {
         EmnistData.epochSize = 10000;
         EmnistData emnistData = new EmnistData(EmnistEnum.TEST);
+
+        // RESET THE NETWORK SAVED TESTING STATS
+        network.testingStats = new NetworkStats();
         
         ParquetFileReader reader = new ParquetFileReader();
         reader.read(TESTING_DATA_URI, 1, emnistData, network);
@@ -41,15 +46,31 @@ public class NetworkService {
         return network.predict(emnistImage);
 	}
 
-    public static NetworkStats getNetworkStatistics() {
+    public static HashMap<String, String> getTrainingStatistics() {
+        final String fileName = FileManagement.TRAINING_STATISTICS_FILENAME;
         if( FileManagement.Filters.hasFile() && 
             FileManagement.Weights.hasFile() && 
             FileManagement.Bias.hasFile() &&
-            FileManagement.Statistics.hasFile()) 
+            FileManagement.Statistics.hasFile(fileName)) 
         {
-            return FileManagement.Statistics.getObjectFromFile();
+            NetworkStats stats = FileManagement.Statistics.getObjectFromFile(fileName);
+            return stats.getMappedObject(true);
         } else {
-            return new NetworkStats();
+            return new NetworkStats().getMappedObject(false);
+        }
+	}
+
+    public static HashMap<String, String> getTestingStatistics() {
+        final String fileName = FileManagement.TESTING_STATISTICS_FILENAME;
+        if( FileManagement.Filters.hasFile() && 
+            FileManagement.Weights.hasFile() && 
+            FileManagement.Bias.hasFile() &&
+            FileManagement.Statistics.hasFile(fileName)) 
+        {
+            NetworkStats stats = FileManagement.Statistics.getObjectFromFile(fileName);
+            return stats.getMappedObject(true);
+        } else {
+            return new NetworkStats().getMappedObject(false);
         }
 	}
 

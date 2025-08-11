@@ -45,9 +45,14 @@ public class NetworkController {
         return NetworkService.predict(image);
     }
 
-    @PostMapping(value = "stats", produces = MediaType.APPLICATION_JSON_VALUE)
-    public HashMap<String, String> stats() {
-        return NetworkService.getNetworkStatistics().getMappedObject();
+    @PostMapping(value = "trainingStats", produces = MediaType.APPLICATION_JSON_VALUE)
+    public HashMap<String, String> trainingStats() {
+        return NetworkService.getTrainingStatistics();
+    }
+
+    @PostMapping(value = "testingStats", produces = MediaType.APPLICATION_JSON_VALUE)
+    public HashMap<String, String> testingStats() {
+        return NetworkService.getTestingStatistics();
     }
 
     @GetMapping(value = "notification", produces = MediaType.TEXT_EVENT_STREAM_VALUE)

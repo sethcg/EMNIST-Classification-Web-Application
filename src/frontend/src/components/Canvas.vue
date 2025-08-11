@@ -30,7 +30,7 @@
   const DrawingCanvas = ref(null);
   const image = ref('');
   const eraser = ref(false);
-  const lineWidth = ref(44);
+  const lineWidth = ref(54);
 
   // ON IMAGE CHANGE, UPDATE PREDICTION
   watch(image, () => {
@@ -70,7 +70,6 @@
       .then((data) => {
         const digit = parseInt(data);
         if (!isNaN(digit)) {
-          console.log(digit);
           emit('update:prediction', digit);
         }
       });
@@ -84,7 +83,7 @@
         <VueDrawingCanvas
           ref="DrawingCanvas"
           v-model:image="image"
-          :eraser="eraser"
+          v-model:eraser="eraser"
           :lineWidth="lineWidth"
           :lock="false"
           :fill-shape="false"
@@ -104,7 +103,7 @@
       </div>
 
       <canvas id="output" class="hidden"></canvas>
-      <CanvasControls :eraser="eraser" :hasNetwork="!props.hasNetwork" />
+      <CanvasControls v-model:eraser="eraser" :hasNetwork="props.hasNetwork" />
     </div>
   </div>
 </template>

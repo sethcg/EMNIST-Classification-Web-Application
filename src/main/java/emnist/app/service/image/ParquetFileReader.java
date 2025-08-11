@@ -3,6 +3,7 @@ package emnist.app.service.image;
 import java.io.ByteArrayInputStream;
 
 import java.util.Base64;
+import java.util.Random;
 
 import javax.imageio.ImageIO;
 
@@ -85,6 +86,7 @@ public class ParquetFileReader {
                         // PROCESS BATCH, AND RESET BATCHING PROCESS
                         if(indexOffset >= EmnistData.batchSize) {                     
                             boolean isLastBatch = batchNum == TOTAL_BATCH_NUM;
+                            shuffleImages(images);
                             emnistData.emnistBatch = new EmnistBatch(epochNum, batchNum, images, isLastBatch);
                             processData.accept(emnistData);
 
@@ -100,6 +102,17 @@ public class ParquetFileReader {
             }
         } catch (Exception exception) {
             exception.printStackTrace();
+        }
+    }
+
+    private static void shuffleImages(EmnistImage[] images) {
+        // FISHER-YATES SHUFFLE ALGORITHM
+        Random random = new Random();
+        for (int i = images.length - 1; i > 0; i--) {
+            int index = random.nextInt(i + 1);
+            EmnistImage image = images[index];
+            images[index] = images[i];
+            images[i] = image;
         }
     }
 

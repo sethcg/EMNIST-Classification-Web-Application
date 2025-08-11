@@ -1,5 +1,5 @@
 <script setup>
-  import { reactive } from 'vue';
+  import { ref } from 'vue';
   import { Icon } from '@iconify/vue';
 
   import NetworkControls from './NetworkControls.vue';
@@ -16,30 +16,30 @@
     },
   });
 
-  const trainingResult = reactive({
-    imageNum: 0,
-    accuracy: '0.0',
-    loss: '0.0',
-  });
-  const testingResult = reactive({
-    imageNum: 0,
-    accuracy: '0.0',
-    loss: '0.0',
-  });
+  const trainingImageNum = ref(0);
+  const trainingAccuracy = ref('0.0');
+  const trainingLoss = ref('0.0');
 
-  // GET NETWORK, AND STATISTICS IF APPLICABLE
+  const testingImageNum = ref(0);
+  const testingAccuracy = ref('0.0');
+  const testingLoss = ref('0.0');
+
+  // GET NETWORK TRAINING STATISTICS IF APPLICABLE
   const getTrainingResults = async () => {
     try {
-      await fetch('/api/stats', { method: 'POST' })
+      await fetch('/api/trainingStats', { method: 'POST' })
         .then((response) => response.text())
         .then((json) => {
           const data = JSON.parse(json);
-          const hasNetwork = String(data.hasNetwork).toLowerCase() === 'true';
-          emit('update:hasNetwork', hasNetwork);
-          if (hasNetwork) {
-            trainingResult.imageNum = Number.parseInt(data.imageNum);
-            trainingResult.accuracy = Number.parseFloat(data.accuracy).toFixed(2);
-            trainingResult.loss = Number.parseFloat(data.loss).toFixed(2);
+          if (String(data.hasNetwork).toLowerCase() === 'true') {
+            trainingImageNum.value = Number.parseInt(data.imageNum);
+            trainingAccuracy.value = Number.parseFloat(data.accuracy).toFixed(2);
+            trainingLoss.value = Number.parseFloat(data.loss).toFixed(2);
+            emit('update:hasNetwork', true);
+
+            testingImageNum.value = 0;
+            testingAccuracy.value = '0.0';
+            testingLoss.value = '0.0';
           }
         });
     } catch (error) {
@@ -47,8 +47,23 @@
     }
   };
 
-  // INITIALIZE THE TRAINING RESULTS, IF ANY
+  // GET NETWORK TESTING STATISTICS IF APPLICABLE
+  const getTestingResults = async () => {
+    await fetch('/api/testingStats', { method: 'POST' })
+      .then((response) => response.text())
+      .then((json) => {
+        const data = JSON.parse(json);
+        if (String(data.hasNetwork).toLowerCase() === 'true') {
+          testingImageNum.value = Number.parseInt(data.imageNum);
+          testingAccuracy.value = Number.parseFloat(data.accuracy).toFixed(2);
+          testingLoss.value = Number.parseFloat(data.loss).toFixed(2);
+        }
+      });
+  };
+
+  // INITIALIZE THE TRAINING/TESTING RESULTS, IF ANY
   await getTrainingResults();
+  await getTestingResults();
 </script>
 
 <template>
@@ -60,13 +75,13 @@
 
       <hr class="mb-[6px] py-[2px] text-neutral-300 bg-neutral-300" />
 
-      <div v-if="props.hasNetwork">
+      <div v-if="hasNetwork">
         <div class="mb-4">
           <div class="flex flex-row grow items-center py-2 px-4 gap-4 bg-lime-900/80 rounded-lg" role="alert">
             <span class="flex justify-center items-center size-[32px] p-1 bg-lime-700/70 rounded-full">
               <Icon icon="fa-solid:check" class="text-lime-300 text-[20px]" />
             </span>
-            <span class="text-lg text-lime-200 font-medium select-none">Network ready for testing</span>
+            <span class="text-lg text-lime-200 font-medium">Network ready for testing</span>
           </div>
         </div>
       </div>
@@ -75,12 +90,12 @@
           <span class="flex justify-center items-center size-[32px] p-1 bg-orange-500/70 rounded-full">
             <Icon icon="fa-solid:exclamation" class="text-orange-300 text-[20px]" />
           </span>
-          <span class="text-lg text-orange-200 font-medium select-none">Network not found</span>
+          <span class="text-lg text-orange-200 font-medium">Network not found</span>
         </div>
       </div>
 
       <!-- TRAINING -->
-      <div v-if="props.hasNetwork">
+      <div v-if="hasNetwork">
         <div class="flex flex-row">
           <span class="font-bold font-rubik text-xl">TRAINING RESULTS</span>
         </div>
@@ -92,19 +107,51 @@
             <li>
               <div class="flex flex-row gap-2">
                 <span class="text-lg font-medium font-rubik">Accuracy:</span>
-                <span class="self-center text-md font-normal">{{ trainingResult.accuracy }}%</span>
+                <span class="self-center text-md font-normal">{{ trainingAccuracy }}%</span>
               </div>
             </li>
             <li>
               <div class="flex flex-row gap-2">
                 <span class="text-lg font-medium font-rubik">Loss:</span>
-                <span class="self-center text-md font-normal">{{ trainingResult.loss }}</span>
+                <span class="self-center text-md font-normal">{{ trainingLoss }}</span>
               </div>
             </li>
             <li>
               <div class="flex flex-row gap-2">
                 <span class="text-lg font-medium font-rubik">Training Images:</span>
-                <span class="self-center text-md font-normal">{{ trainingResult.imageNum }}</span>
+                <span class="self-center text-md font-normal">{{ trainingImageNum }}</span>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- TESTING -->
+      <div v-if="hasNetwork">
+        <div class="flex flex-row">
+          <span class="font-bold font-rubik text-xl">TESTING RESULTS</span>
+        </div>
+
+        <hr class="my-[6px] py-[2px] text-neutral-300 bg-neutral-300" />
+
+        <div class="mb-4">
+          <ul class="flex flex-col gap-[2px] ml-4 list-none">
+            <li>
+              <div class="flex flex-row gap-2">
+                <span class="text-lg font-medium font-rubik">Accuracy:</span>
+                <span class="self-center text-md font-normal">{{ testingAccuracy }}%</span>
+              </div>
+            </li>
+            <li>
+              <div class="flex flex-row gap-2">
+                <span class="text-lg font-medium font-rubik">Loss:</span>
+                <span class="self-center text-md font-normal">{{ testingLoss }}</span>
+              </div>
+            </li>
+            <li>
+              <div class="flex flex-row gap-2">
+                <span class="text-lg font-medium font-rubik">Testing Images:</span>
+                <span class="self-center text-md font-normal">{{ testingImageNum }}</span>
               </div>
             </li>
           </ul>
@@ -112,12 +159,12 @@
       </div>
 
       <!-- NETWORK PREDICTION -->
-      <div v-if="props.hasNetwork" class="flex flex-row gap-2">
+      <div v-if="hasNetwork" class="flex flex-row gap-2">
         <p class="font-bold font-rubik text-xl">PREDICTION:</p>
-        <p class="font-bold font-rubik text-xl">{{ props.prediction }}</p>
+        <p class="font-bold font-rubik text-xl">{{ prediction }}</p>
       </div>
     </div>
-    <NetworkControls @trainingComplete="getTrainingResults" :hasNetwork="props.hasNetwork" />
+    <NetworkControls @trainingComplete="getTrainingResults" @testingComplete="getTestingResults" :hasNetwork="hasNetwork" />
   </div>
 </template>
 
