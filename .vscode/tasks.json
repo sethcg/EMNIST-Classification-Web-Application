@@ -5,10 +5,10 @@
             "label": "Build Application",
             "type": "shell",
             "command": "mvn clean package",
-            // UNCOMMENT TO RUN APPLICATION WITHOUT TESTING
-            // "args": [
-            //     "-DskipTests"
-            // ],
+            "args": [
+                // BUILD APPLICATION WITHOUT TESTING
+                // "-DskipTests",
+            ],
             "group": {
                 "kind": "build",
                 "isDefault": true

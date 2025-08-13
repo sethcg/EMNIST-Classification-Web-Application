@@ -7,18 +7,22 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import emnist.app.service.network.NetworkStats;
 
 public class FileManagement {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(FileManagement.class);
+
     private static final String DATA_DIRECTORY = System.getProperty("user.dir") + "/src/main/java/emnist/app/data/network/";
-
-    public static final String TRAINING_STATISTICS_FILENAME =  DATA_DIRECTORY + "TrainingStats.ser";
-    public static final String TESTING_STATISTICS_FILENAME =  DATA_DIRECTORY + "TestingStats.ser";
-
     private static final String FILTERS_FILENAME =  DATA_DIRECTORY + "Filters.ser";
     private static final String WEIGHTS_FILENAME =  DATA_DIRECTORY + "Weights.ser";
     private static final String BIAS_FILENAME =  DATA_DIRECTORY + "Bias.ser";
+
+    public static final String TRAINING_STATISTICS_FILENAME =  DATA_DIRECTORY + "TrainingStats.ser";
+    public static final String TESTING_STATISTICS_FILENAME =  DATA_DIRECTORY + "TestingStats.ser";
 
     public static void RemoveFile(String fileName) {
         File file = new File(fileName);
@@ -41,8 +45,9 @@ public class FileManagement {
             
             try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(FILTERS_FILENAME, false))) {
                 outputStream.writeObject(filters);
-            } catch (IOException exception) {
-                // TODO: MORE VERBOSE EXCEPTION HANDLING
+            } catch (Exception exception) {
+                LOGGER.error(String.format("[SAVING FILTERS FAILED] %s", exception.getMessage()));
+                LOGGER.debug(String.format("[FILE PATH] %s", FILTERS_FILENAME));
             }
         }
 
@@ -73,7 +78,8 @@ public class FileManagement {
             try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(WEIGHTS_FILENAME, false))) {
                 outputStream.writeObject(weights);
             } catch (Exception exception) {
-                // TODO: MORE VERBOSE EXCEPTION HANDLING
+                LOGGER.error(String.format("[SAVING WEIGHTS FAILED] %s", exception.getMessage()));
+                LOGGER.debug(String.format("[FILE PATH] %s", WEIGHTS_FILENAME));
             }
         }
 
@@ -104,7 +110,8 @@ public class FileManagement {
             try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(BIAS_FILENAME, false))) {
                 outputStream.writeObject(bias);
             } catch (IOException exception) {
-                // TODO: MORE VERBOSE EXCEPTION HANDLING
+                LOGGER.error(String.format("[SAVING BIAS FAILED] %s", exception.getMessage()));
+                LOGGER.debug(String.format("[FILE PATH] %s", BIAS_FILENAME));
             }
         }
 
@@ -135,7 +142,8 @@ public class FileManagement {
             try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(fileName, false))) {
                 outputStream.writeObject(stats);
             } catch (IOException exception) {
-                // TODO: MORE VERBOSE EXCEPTION HANDLING
+                LOGGER.error(String.format("[SAVING STATISTICS FAILED] %s", exception.getMessage()));
+                LOGGER.debug(String.format("[FILE PATH] %s", fileName));
             }
         }
 

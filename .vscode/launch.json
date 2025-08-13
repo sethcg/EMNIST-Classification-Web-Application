@@ -1,10 +1,10 @@
 {
-    "version": "0.2.0",
+    "version": "2.0.0",
     "configurations": [
         {
             "type": "java",
-            "vmArgs": "--add-opens=java.base/java.nio=org.apache.arrow.memory.core,ALL-UNNAMED",
             "name": "Run Application",
+            "vmArgs": "--add-opens=java.base/java.nio=org.apache.arrow.memory.core,ALL-UNNAMED",
             "cwd": "${workspaceFolder}",
             "request": "launch",
             "mainClass": "${workspaceFolder}\\src\\main\\java\\emnist\\app\\Application.java",
