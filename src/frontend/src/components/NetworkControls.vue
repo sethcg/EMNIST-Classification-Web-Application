@@ -1,7 +1,14 @@
 <script setup>
   import { ref } from 'vue';
 
-  const emit = defineEmits(['trainingComplete', 'testingComplete']);
+  const emit = defineEmits([
+    'trainingComplete',
+    'testingComplete',
+    'setTrainingInProgress',
+    'setTrainingProgress',
+    'setTestingInProgress',
+    'setTestingProgress',
+  ]);
   const props = defineProps({
     hasNetwork: {
       type: Boolean,
@@ -13,17 +20,19 @@
   const disabledTest = ref(!props.hasNetwork);
 
   const train = () => {
+    emit('setTrainingInProgress', true);
     disabledTrain.value = true;
     disabledTest.value = true;
     const eventSource = new EventSource('/api/notification');
     eventSource.onerror = (error) => console.error('Connection error:', error);
     eventSource.addEventListener('trainingUpdate', (event) => {
-      const message = JSON.parse(event.data);
-      console.log(message);
+      const data = JSON.parse(event.data);
+      emit('setTrainingProgress', data);
     });
     fetch('/api/train', { method: 'POST' })
       .then((response) => response.text())
       .then(() => {
+        emit('setTrainingInProgress', false);
         emit('trainingComplete');
         eventSource.close();
         disabledTrain.value = false;
@@ -32,17 +41,19 @@
   };
 
   const test = () => {
+    emit('setTestingInProgress', true);
     disabledTrain.value = true;
     disabledTest.value = true;
     const eventSource = new EventSource('/api/notification');
     eventSource.onerror = (error) => console.error('Connection error:', error);
     eventSource.addEventListener('testingUpdate', (event) => {
-      const message = JSON.parse(event.data);
-      console.log(message);
+      const data = JSON.parse(event.data);
+      emit('setTestingProgress', data);
     });
     fetch('/api/test', { method: 'POST' })
       .then((response) => response.text())
       .then(() => {
+        emit('setTestingInProgress', false);
         emit('testingComplete');
         eventSource.close();
         disabledTrain.value = false;

@@ -4,7 +4,7 @@
 
   import NetworkControls from './NetworkControls.vue';
 
-  const emit = defineEmits(['update:hasNetwork']);
+  const emit = defineEmits(['update:hasNetwork', 'update:prediction']);
   const props = defineProps({
     prediction: {
       type: Number,
@@ -16,6 +16,9 @@
     },
   });
 
+  const trainingInProgress = ref(false);
+  const testingInProgress = ref(false);
+
   const trainingImageNum = ref(0);
   const trainingAccuracy = ref('0.0');
   const trainingLoss = ref('0.0');
@@ -23,6 +26,47 @@
   const testingImageNum = ref(0);
   const testingAccuracy = ref('0.0');
   const testingLoss = ref('0.0');
+
+  let imageNum = 0;
+
+  // HANDLE TRAINING PROGRESS VALUES, UPDATING EACH BATCH
+  const setTrainingInProgress = (inProgress) => {
+    imageNum = 0;
+    emit('update:prediction', null);
+    emit('update:hasNetwork', false);
+    trainingInProgress.value = inProgress;
+
+    trainingImageNum.value = 0;
+    trainingAccuracy.value = '0.0';
+    trainingLoss.value = '0.0';
+
+    testingImageNum.value = 0;
+    testingAccuracy.value = '0.0';
+    testingLoss.value = '0.0';
+  };
+
+  const setTrainingProgress = (data) => {
+    imageNum += Number.parseInt(data.steps);
+    trainingImageNum.value = Number.parseInt(imageNum);
+    trainingAccuracy.value = Number.parseFloat(data.accuracy).toFixed(2);
+    trainingLoss.value = Number.parseFloat(data.loss).toFixed(2);
+  };
+
+  // HANDLE TESTING PROGRESS VALUES, UPDATING EACH BATCH
+  const setTestingInProgress = (inProgress) => {
+    imageNum = 0;
+    testingInProgress.value = inProgress;
+    testingImageNum.value = 0;
+    testingAccuracy.value = '0.0';
+    testingLoss.value = '0.0';
+  };
+
+  const setTestingProgress = (data) => {
+    imageNum += Number.parseInt(data.steps);
+    testingImageNum.value = Number.parseInt(imageNum);
+    testingAccuracy.value = Number.parseFloat(data.accuracy).toFixed(2);
+    testingLoss.value = Number.parseFloat(data.loss).toFixed(2);
+  };
 
   // GET NETWORK TRAINING STATISTICS IF APPLICABLE
   const getTrainingResults = async () => {
@@ -75,7 +119,7 @@
 
       <hr class="mb-[6px] py-[2px] text-neutral-300 bg-neutral-300" />
 
-      <div v-if="hasNetwork">
+      <div v-if="hasNetwork && !trainingInProgress">
         <div class="mb-4">
           <div class="flex flex-row grow items-center py-2 px-4 gap-4 bg-lime-900/80 rounded-lg" role="alert">
             <span class="flex justify-center items-center size-[32px] p-1 bg-lime-700/70 rounded-full">
@@ -85,17 +129,25 @@
           </div>
         </div>
       </div>
-      <div v-else>
+      <div v-else-if="trainingInProgress">
         <div class="flex flex-row grow items-center py-2 px-4 gap-4 bg-orange-900/80 rounded-lg" role="alert">
           <span class="flex justify-center items-center size-[32px] p-1 bg-orange-500/70 rounded-full">
-            <Icon icon="fa-solid:exclamation" class="text-orange-300 text-[20px]" />
+            <Icon icon="fa7-solid:clock-rotate-left" class="text-orange-300 text-[20px]" />
           </span>
-          <span class="text-lg text-orange-200 font-medium">Network not found</span>
+          <span class="text-lg text-orange-200 font-medium">Network training in progress</span>
+        </div>
+      </div>
+      <div v-else>
+        <div class="flex flex-row grow items-center py-2 px-4 gap-4 bg-red-900/80 rounded-lg" role="alert">
+          <span class="flex justify-center items-center size-[32px] p-1 bg-red-500/70 rounded-full">
+            <Icon icon="fa-solid:exclamation" class="text-red-300 text-[20px]" />
+          </span>
+          <span class="text-lg text-red-200 font-medium">Network not found</span>
         </div>
       </div>
 
       <!-- TRAINING -->
-      <div v-if="hasNetwork">
+      <div v-if="hasNetwork || trainingInProgress">
         <div class="flex flex-row">
           <span class="font-bold font-rubik text-xl">TRAINING RESULTS</span>
         </div>
@@ -164,7 +216,14 @@
         <p class="font-bold font-rubik text-xl">{{ prediction }}</p>
       </div>
     </div>
-    <NetworkControls @trainingComplete="getTrainingResults" @testingComplete="getTestingResults" :hasNetwork="hasNetwork" />
+    <NetworkControls
+      @trainingComplete="getTrainingResults"
+      @testingComplete="getTestingResults"
+      @setTrainingInProgress="setTrainingInProgress"
+      @setTrainingProgress="setTrainingProgress"
+      @setTestingInProgress="setTestingInProgress"
+      @setTestingProgress="setTestingProgress"
+      :hasNetwork="hasNetwork" />
   </div>
 </template>
 

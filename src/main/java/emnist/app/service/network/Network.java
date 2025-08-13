@@ -79,6 +79,9 @@ public class Network implements Consumer<EmnistData> {
                     FileManagement.Weights.saveMatrix(softMax.cachedWeights);
                     FileManagement.Bias.saveMatrix(softMax.cachedBias);
                     FileManagement.Statistics.saveStatistics(trainingStats, FileManagement.TRAINING_STATISTICS_FILENAME);
+                    
+                    // REMOVE PREVIOUS (OUTDATED) TESTING STATISTICS
+                    FileManagement.RemoveFile(FileManagement.TESTING_STATISTICS_FILENAME);
                 }
                 break;
             case TEST:

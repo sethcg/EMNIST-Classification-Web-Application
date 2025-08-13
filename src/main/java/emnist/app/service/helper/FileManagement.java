@@ -20,6 +20,11 @@ public class FileManagement {
     private static final String WEIGHTS_FILENAME =  DATA_DIRECTORY + "Weights.ser";
     private static final String BIAS_FILENAME =  DATA_DIRECTORY + "Bias.ser";
 
+    public static void RemoveFile(String fileName) {
+        File file = new File(fileName);
+        if (!file.exists()) file.delete();
+    }
+
     public static class Filters {
 
         public static boolean hasFile() {
