@@ -16,6 +16,8 @@ jobs:
         java-version: '21'
     - name: Build with Maven
       run: mvn clean package --batch-mode --quiet
+    - name: Run Application
+      run: mvn spring-boot:run &
   build_on_mac:
     runs-on: macos-latest
     steps:
@@ -28,6 +30,8 @@ jobs:
         java-version: '21'
     - name: Build with Maven
       run: mvn clean package --batch-mode --quiet
+    - name: Run Application
+      run: mvn spring-boot:run &
   build_on_windows:
     runs-on: windows-latest
     steps:
@@ -40,3 +44,5 @@ jobs:
         java-version: '21'
     - name: Build with Maven
       run: mvn clean package --batch-mode --quiet
+    - name: Run Application
+      run: mvn spring-boot:run &
