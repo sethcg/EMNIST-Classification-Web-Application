@@ -21,6 +21,12 @@ public class NetworkController {
     @Autowired
     private Environment environment;
 
+    private final NetworkService networkService;
+ 
+    public NetworkController(NetworkService networkService) {
+        this.networkService = networkService;
+    }
+
     @PostMapping(value = "ping", produces = MediaType.TEXT_PLAIN_VALUE)
     public String ping() {
         StringBuilder string = new StringBuilder();
@@ -32,27 +38,27 @@ public class NetworkController {
 
     @PostMapping("train")
     public void train() {
-        NetworkService.train();
+        networkService.train();
     }
 
     @PostMapping("test")
     public void test() {
-        NetworkService.test();
+        networkService.test();
     }
 
     @PostMapping(value = "predict", consumes = MediaType.APPLICATION_JSON_VALUE)
     public int predict(@RequestBody float[][] image) {
-        return NetworkService.predict(image);
+        return networkService.predict(image);
     }
 
     @PostMapping(value = "trainingStats", produces = MediaType.APPLICATION_JSON_VALUE)
     public HashMap<String, String> trainingStats() {
-        return NetworkService.getTrainingStatistics();
+        return networkService.getTrainingStatistics();
     }
 
     @PostMapping(value = "testingStats", produces = MediaType.APPLICATION_JSON_VALUE)
     public HashMap<String, String> testingStats() {
-        return NetworkService.getTestingStatistics();
+        return networkService.getTestingStatistics();
     }
 
     @GetMapping(value = "notification", produces = MediaType.TEXT_EVENT_STREAM_VALUE)

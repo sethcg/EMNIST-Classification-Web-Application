@@ -2,6 +2,8 @@ package emnist.app.service;
 
 import java.util.HashMap;
 
+import org.springframework.stereotype.Service;
+
 import emnist.app.service.helper.FileManagement;
 import emnist.app.service.image.EmnistData;
 import emnist.app.service.image.EmnistData.EmnistEnum;
@@ -10,6 +12,7 @@ import emnist.app.service.image.ParquetFileReader;
 import emnist.app.service.network.Network;
 import emnist.app.service.network.NetworkStats;
 
+@Service
 public class NetworkService {
 
     public static final String DATA_DIRECTORY = System.getProperty("user.dir") + "/src/main/java/emnist/app/data/";
@@ -19,7 +22,7 @@ public class NetworkService {
 
     private static final Network network = new Network();
 
-	public static void train() {
+	public void train() {
         EmnistData.epochSize = 60000;
         EmnistData emnistData = new EmnistData(EmnistEnum.TRAIN);
 
@@ -30,7 +33,7 @@ public class NetworkService {
         reader.read(TRAINING_DATA_URI, 1, emnistData, network);
 	}
 
-    public static void test() {
+    public void test() {
         EmnistData.epochSize = 10000;
         EmnistData emnistData = new EmnistData(EmnistEnum.TEST);
 
@@ -41,12 +44,12 @@ public class NetworkService {
         reader.read(TESTING_DATA_URI, 1, emnistData, network);
 	}
 
-    public static int predict(float[][] image) {
+    public int predict(float[][] image) {
         EmnistImage emnistImage = new EmnistImage(-1, image);
         return network.predict(emnistImage);
 	}
 
-    public static HashMap<String, String> getTrainingStatistics() {
+    public HashMap<String, String> getTrainingStatistics() {
         final String fileName = FileManagement.TRAINING_STATISTICS_FILENAME;
         if( FileManagement.Filters.hasFile() && 
             FileManagement.Weights.hasFile() && 
@@ -60,7 +63,7 @@ public class NetworkService {
         }
 	}
 
-    public static HashMap<String, String> getTestingStatistics() {
+    public HashMap<String, String> getTestingStatistics() {
         final String fileName = FileManagement.TESTING_STATISTICS_FILENAME;
         if( FileManagement.Filters.hasFile() && 
             FileManagement.Weights.hasFile() && 
@@ -74,7 +77,7 @@ public class NetworkService {
         }
 	}
 
-    // public static void printMatrix(float matrix[][])
+    // public void printMatrix(float matrix[][])
     // {
     //     for (int i = 0; i < matrix.length; i++){
 	// 		System.out.println();

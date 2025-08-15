@@ -4,11 +4,8 @@
         {
             "label": "Build Application",
             "type": "shell",
-            "command": "mvn clean package",
-            "args": [
-                // BUILD APPLICATION WITHOUT TESTING
-                // "-DskipTests",
-            ],
+            // BUILD APPLICATION WITHOUT TESTING USING "-DskipTests"
+            "command": "mvn clean package -DskipTests",
             "group": {
                 "kind": "build",
                 "isDefault": true
