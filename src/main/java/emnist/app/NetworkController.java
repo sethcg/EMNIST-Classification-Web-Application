@@ -28,7 +28,7 @@ public class NetworkController {
     }
 
     @PostMapping(value = "ping", produces = MediaType.TEXT_PLAIN_VALUE)
-    public String ping() {
+    public String Ping() {
         StringBuilder string = new StringBuilder();
         string.append("[Spring Boot Application info]");
         string.append("\nName: " + environment.getProperty("application.name"));
@@ -37,32 +37,32 @@ public class NetworkController {
     }
 
     @PostMapping("train")
-    public void train() {
+    public void Train() {
         networkService.train();
     }
 
     @PostMapping("test")
-    public void test() {
+    public void Test() {
         networkService.test();
     }
 
     @PostMapping(value = "predict", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public int predict(@RequestBody float[][] image) {
+    public int Predict(@RequestBody float[][] image) {
         return networkService.predict(image);
     }
 
     @PostMapping(value = "trainingStats", produces = MediaType.APPLICATION_JSON_VALUE)
-    public HashMap<String, String> trainingStats() {
+    public HashMap<String, String> TrainingStats() {
         return networkService.getTrainingStatistics();
     }
 
     @PostMapping(value = "testingStats", produces = MediaType.APPLICATION_JSON_VALUE)
-    public HashMap<String, String> testingStats() {
+    public HashMap<String, String> TestingStats() {
         return networkService.getTestingStatistics();
     }
 
     @GetMapping(value = "notification", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter notification() {
+    public SseEmitter Notification() {
         SseEmitter emitter = new SseEmitter(0L); // NO TIMEOUT
 
         ExecutorService executor = Executors.newSingleThreadExecutor();

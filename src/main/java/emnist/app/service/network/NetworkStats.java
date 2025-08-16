@@ -9,6 +9,14 @@ public class NetworkStats implements Serializable{
 
     public double accuracy, loss = 0.0f;
 
+    public NetworkStats() { }
+
+    public NetworkStats(int imageNum, double accuracy, double loss) {
+        this.imageNum = imageNum;
+        this.accuracy = accuracy;
+        this.loss = loss;
+    }
+
     public HashMap<String, String> getMappedObject(boolean hasNetwork) {
         return new HashMap<String, String>(){{
             put("hasNetwork", Boolean.toString(hasNetwork));
