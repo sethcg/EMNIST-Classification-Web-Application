@@ -70,25 +70,25 @@
 
   // GET NETWORK TRAINING STATISTICS IF APPLICABLE
   const getTrainingResults = async () => {
-    try {
-      await fetch('/api/trainingStats', { method: 'POST' })
-        .then((response) => response.text())
-        .then((json) => {
-          const data = JSON.parse(json);
-          if (String(data.hasNetwork).toLowerCase() === 'true') {
-            trainingImageNum.value = Number.parseInt(data.imageNum);
-            trainingAccuracy.value = Number.parseFloat(data.accuracy).toFixed(2);
-            trainingLoss.value = Number.parseFloat(data.loss).toFixed(2);
-            emit('update:hasNetwork', true);
+    await fetch('/api/trainingStats', { method: 'POST' })
+      .then((response) => response.text())
+      .then((json) => {
+        const data = JSON.parse(json);
+        if (String(data.hasNetwork).toLowerCase() === 'true') {
+          trainingImageNum.value = Number.parseInt(data.imageNum);
+          trainingAccuracy.value = Number.parseFloat(data.accuracy).toFixed(2);
+          trainingLoss.value = Number.parseFloat(data.loss).toFixed(2);
+          emit('update:hasNetwork', true);
 
-            testingImageNum.value = 0;
-            testingAccuracy.value = '0.0';
-            testingLoss.value = '0.0';
-          }
-        });
-    } catch (error) {
-      emit('update:hasNetwork', false);
-    }
+          testingImageNum.value = 0;
+          testingAccuracy.value = '0.0';
+          testingLoss.value = '0.0';
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+        emit('update:hasNetwork', false);
+      });
   };
 
   // GET NETWORK TESTING STATISTICS IF APPLICABLE
@@ -102,6 +102,9 @@
           testingAccuracy.value = Number.parseFloat(data.accuracy).toFixed(2);
           testingLoss.value = Number.parseFloat(data.loss).toFixed(2);
         }
+      })
+      .catch((error) => {
+        console.error(error);
       });
   };
 

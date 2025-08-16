@@ -65,8 +65,16 @@
 <template>
   <div class="flex flex-col gap-2">
     <div class="flex flex-row gap-2">
-      <button class="flex flex-row items-center py-1 px-3 disabled:opacity-60" @click="train" :disabled="disabledTrain">TRAIN</button>
-      <button class="flex flex-row items-center py-1 px-3 disabled:opacity-60" @click="test" :disabled="disabledTest">TEST</button>
+      <button class="flex flex-row items-center py-1 px-3 disabled:opacity-60" @click="train" :disabled="disabledTrain">
+        TRAIN
+      </button>
+      <button
+        class="flex flex-row items-center py-1 px-3 disabled:opacity-60"
+        :class="{ hidden: !hasNetwork }"
+        :disabled="disabledTest"
+        @click="test">
+        TEST
+      </button>
     </div>
   </div>
 </template>

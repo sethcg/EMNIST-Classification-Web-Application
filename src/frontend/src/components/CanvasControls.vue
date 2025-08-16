@@ -27,12 +27,18 @@
 
 <template>
   <div class="flex flex-row justify-self-start gap-2 my-2">
-    <button class="flex flex-row items-center py-2 px-4" :disabled="!hasNetwork" @click.prevent="$parent.$refs.DrawingCanvas.undo()">
+    <button
+      class="flex flex-row items-center py-2 px-4"
+      :disabled="!hasNetwork"
+      @click.prevent="$parent.$refs.DrawingCanvas.undo()">
       <Icon icon="lucide:undo-2" class="text-[24px] pointer-events-none outline-none" />
       <span class="hidden">UNDO</span>
     </button>
 
-    <button class="flex flex-row items-center py-2 px-4" :disabled="!hasNetwork" @click.prevent="$parent.$refs.DrawingCanvas.redo()">
+    <button
+      class="flex flex-row items-center py-2 px-4"
+      :disabled="!hasNetwork"
+      @click.prevent="$parent.$refs.DrawingCanvas.redo()">
       <Icon icon="lucide:redo-2" class="text-[24px] pointer-events-none outline-none" />
       <span class="hidden">REDO</span>
     </button>
@@ -57,7 +63,10 @@
       <span class="hidden">ERASE</span>
     </button>
 
-    <button class="flex flex-row items-center py-2 px-4" :disabled="!hasNetwork" @click.prevent="$parent.$refs.DrawingCanvas.reset()">
+    <button
+      class="flex flex-row items-center py-2 px-4"
+      :disabled="!hasNetwork"
+      @click.prevent="$parent.$refs.DrawingCanvas.reset()">
       <Icon icon="lucide:trash-2" class="text-[24px] pointer-events-none outline-none" />
       <span class="hidden">RESET</span>
     </button>

@@ -4,7 +4,7 @@
   import Network from './components/Network.vue';
 
   const prediction = ref(null);
-  const hasNetwork = ref(false);
+  const hasNetwork = ref(null);
 </script>
 
 <template>

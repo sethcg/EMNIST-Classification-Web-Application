@@ -21,11 +21,8 @@ public class NetworkController {
     @Autowired
     private Environment environment;
 
-    private final NetworkService networkService;
- 
-    public NetworkController(NetworkService networkService) {
-        this.networkService = networkService;
-    }
+    @Autowired
+    private NetworkService networkService;
 
     @PostMapping(value = "ping", produces = MediaType.TEXT_PLAIN_VALUE)
     public String Ping() {
