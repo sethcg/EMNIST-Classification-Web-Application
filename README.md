@@ -38,9 +38,9 @@ A web application that takes a user drawn image and uses a convolutional neural 
 ### Screenshots:
 <details close>
   <summary>Show</summary>
-  <img src="https://github.com/user-attachments/assets/7b99ea1a-4438-4eae-b4ed-f2d2fd02c84b" width="300" height="232">
-  <img src="https://github.com/user-attachments/assets/59a096f5-9301-4001-ad3c-9d75a8907a32" width="300" height="232">
-  <img src="https://github.com/user-attachments/assets/a29e7ec1-e69e-4a7f-b857-42576c47b9bd" width="300" height="232">
+  <img src="https://github.com/user-attachments/assets/7b99ea1a-4438-4eae-b4ed-f2d2fd02c84b" width="450" height="348">
+  <img src="https://github.com/user-attachments/assets/59a096f5-9301-4001-ad3c-9d75a8907a32" width="450" height="348">
+  <img src="https://github.com/user-attachments/assets/a29e7ec1-e69e-4a7f-b857-42576c47b9bd" width="450" height="348">
 </details>
 
 ---
