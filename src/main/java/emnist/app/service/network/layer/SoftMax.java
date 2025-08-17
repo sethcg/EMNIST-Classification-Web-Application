@@ -5,25 +5,25 @@ import emnist.app.service.helper.Matrix;
 import emnist.app.service.helper.Vector;
 
 public class SoftMax {
-    
-    public float[][] cachedWeights;   // [1342] x [10]
-    public float[][] cachedBias;      // [1] x [10]
-    
+
+    public float[][] cachedWeights; // [1342] x [10]
+    public float[][] cachedBias; // [1] x [10]
+
     public float[][] flattenedInput;
     public float[][] softMaxTotals;
 
     private float[][] getBias(boolean reset) {
         float[][] bias = FileManagement.Bias.getMatrixFromFile();
-        return reset || bias == null 
-            ? Vector.getVectorArrayOfZero(10) 
-            : bias;
+        return reset || bias == null
+                ? Vector.getVectorArrayOfZero(10)
+                : bias;
     }
 
     private float[][] getWeights(boolean reset, int input, int output) {
         float[][] weights = FileManagement.Weights.getMatrixFromFile();
-        return reset || weights == null 
-            ? Matrix.getElementWiseScaling(Matrix.getRandomizedMatrix(input, output), 1.0f / input) 
-            : weights;
+        return reset || weights == null
+                ? Matrix.getElementWiseScaling(Matrix.getRandomizedMatrix(input, output), 1.0f / input)
+                : weights;
     }
 
     public SoftMax(boolean reset, int input, int output) {
@@ -35,11 +35,12 @@ public class SoftMax {
         // FLATTEN THE MATRIX FOR EASE OF USE
         flattenedInput = Matrix.getFlattenedMatrix(input);
 
-        // EVALUATE THE TOTAL ACTIVATION VALUES AND CACHE THE TOTALS FOR BACK PROPAGATION.
+        // EVALUATE THE TOTAL ACTIVATION VALUES AND CACHE THE TOTALS FOR BACK
+        // PROPAGATION.
         float[][] activatedValues = Matrix.getElementWiseAddition(Matrix.getMultipliedMatrix(flattenedInput, cachedWeights), cachedBias);
         softMaxTotals = new float[1][cachedBias.length];
         softMaxTotals = Vector.getElementWiseExponentiationVectorArray(activatedValues);
-        
+
         // NORMALIZE THE PROBABILTIES SO THAT THE SUM OF ALL PROBABILITIES IS ONE
         float scale = 1 / Vector.getVectorArraySum(softMaxTotals);
         return Vector.getElementWiseScaledVectorArray(softMaxTotals, scale);
@@ -50,7 +51,7 @@ public class SoftMax {
         float[][] lossGradient = new float[1][inputGradientMatrix[0].length];
         float softMaxSum = Vector.getVectorArraySum(softMaxTotals);
         float[][] lossInputGradient = null;
-        
+
         for (int i = 0; i < inputGradientMatrix[0].length; i++) {
             float scale = inputGradientMatrix[0][i];
             if (scale == 0) {
@@ -59,10 +60,12 @@ public class SoftMax {
 
             // GRADIENT OF THE OUTPUT LAYER
             // [1] x [10]
-            float[][] outputLayerGradient = Vector.getElementWiseScaledVectorArray(softMaxTotals, -softMaxTotals[0][i] / (softMaxSum * softMaxSum));
-            outputLayerGradient[0][i] = softMaxTotals[0][i] * (softMaxSum - softMaxTotals[0][i]) / (softMaxSum * softMaxSum);
-            
-            lossGradient = Matrix.getElementWiseScaling(outputLayerGradient, scale); 
+            float[][] outputLayerGradient = Vector.getElementWiseScaledVectorArray(softMaxTotals,
+                    -softMaxTotals[0][i] / (softMaxSum * softMaxSum));
+            outputLayerGradient[0][i] = softMaxTotals[0][i] * (softMaxSum - softMaxTotals[0][i])
+                    / (softMaxSum * softMaxSum);
+
+            lossGradient = Matrix.getElementWiseScaling(outputLayerGradient, scale);
 
             // GRADIENT OF THE TOTALS WEIGHTS
             // [1342] x [1]

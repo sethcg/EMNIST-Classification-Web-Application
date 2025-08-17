@@ -11,7 +11,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 public class NotificationService {
 
     private static final Collection<SseEmitter> emitters = new CopyOnWriteArrayList<>();
-    
+
     public static void addEmitter(SseEmitter emitter) {
         emitters.add(emitter);
     }
@@ -26,8 +26,8 @@ public class NotificationService {
             try {
                 String jsonString = NotificationSerializer.getJsonString(notification);
                 emitter.send(SseEmitter.event()
-                    .name(eventName)
-                    .data(jsonString, MediaType.TEXT_EVENT_STREAM));
+                        .name(eventName)
+                        .data(jsonString, MediaType.TEXT_EVENT_STREAM));
             } catch (IOException exception) {
                 // HANDLE DISCONNECT
                 emitter.completeWithError(exception);

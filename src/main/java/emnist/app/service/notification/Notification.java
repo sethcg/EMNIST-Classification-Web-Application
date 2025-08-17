@@ -15,5 +15,5 @@ public class Notification {
         this.epochNum = epochNum;
         this.batchNum = batchNum;
     }
-    
+
 }

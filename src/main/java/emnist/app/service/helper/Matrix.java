@@ -9,7 +9,7 @@ public class Matrix {
 
     public static float[][] getRandomizedMatrix(Integer rowLength, Integer columnLength) {
         float[][] outputMatrix = new float[rowLength][columnLength];
-        BiFunction<Integer, Integer> function = (x, y) -> { 
+        BiFunction<Integer, Integer> function = (x, y) -> {
             outputMatrix[x][y] = (float) Math.random();
         };
         FunctionHelper.executeFunction(rowLength, columnLength, function);
@@ -20,12 +20,12 @@ public class Matrix {
         float[][] subMatrix = new float[rowEnd - rowStart + 1][columnEnd - columnStart + 1];
         int rowLength = subMatrix.length;
         int columnLength = subMatrix[0].length;
-        BiFunction<Integer, Integer> function = (x, y) -> { 
+        BiFunction<Integer, Integer> function = (x, y) -> {
             subMatrix[x][y] = matrix[rowStart + x][columnStart + y];
         };
         FunctionHelper.executeFunction(rowLength, columnLength, function);
         return subMatrix;
-	}
+    }
 
     public static float[][] getFlattenedMatrix(float[][][] matrix) {
         int rowLength = matrix.length;
@@ -80,7 +80,7 @@ public class Matrix {
         int columnLength = matrix[0].length;
         AtomicReference<Float> max = new AtomicReference<Float>(matrix[0][0]);
         BiFunction<Integer, Integer> function = (x, y) -> {
-            if(max.get() < matrix[x][y]) {
+            if (max.get() < matrix[x][y]) {
                 max.set(matrix[x][y]);
             }
         };
@@ -88,7 +88,7 @@ public class Matrix {
         return max.get();
     }
 
-	public static float getElementWiseMultiplicationSum(float[][] matrixOne, float[][] matrixTwo) {
+    public static float getElementWiseMultiplicationSum(float[][] matrixOne, float[][] matrixTwo) {
         int rowLength = matrixOne.length;
         int columnLength = matrixTwo[0].length;
         AtomicReference<Float> sum = new AtomicReference<Float>(0.0f);
@@ -97,28 +97,28 @@ public class Matrix {
         };
         FunctionHelper.executeFunction(rowLength, columnLength, function);
         return sum.get();
-	}
+    }
 
     public static float[][] getElementWiseAddition(float[][] matrixOne, float[][] matrixTwo) {
         int rowLength = matrixOne.length;
         int columnLength = matrixOne[0].length;
         float[][] outputMatrix = new float[rowLength][columnLength];
-        BiFunction<Integer, Integer> function = (x, y) -> { 
+        BiFunction<Integer, Integer> function = (x, y) -> {
             outputMatrix[x][y] = matrixOne[x][y] + matrixTwo[x][y];
         };
         FunctionHelper.executeFunction(rowLength, columnLength, function);
         return outputMatrix;
-	}
+    }
 
     public static float[][] getElementWiseScaling(float[][] matrix, float scale) {
         int rowLength = matrix.length;
         int columnLength = matrix[0].length;
         float[][] outputMatrix = new float[rowLength][columnLength];
-        BiFunction<Integer, Integer> function = (x, y) -> { 
+        BiFunction<Integer, Integer> function = (x, y) -> {
             outputMatrix[x][y] = (float) matrix[x][y] * scale;
         };
         FunctionHelper.executeFunction(rowLength, columnLength, function);
         return outputMatrix;
-	}
+    }
 
 }

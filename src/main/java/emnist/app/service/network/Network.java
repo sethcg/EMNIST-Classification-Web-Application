@@ -21,7 +21,7 @@ public class Network implements Consumer<EmnistData> {
     private Convolution convolution;
     private MaxPooling maxPooling;
     private SoftMax softMax;
-    
+
     public NetworkStats trainingStats;
     public NetworkStats testingStats;
 
@@ -58,7 +58,7 @@ public class Network implements Consumer<EmnistData> {
         EmnistImage[] images = data.emnistBatch.images;
         Notification notification = new Notification(epochNum, batchNum);
 
-        switch(data.dataType) {
+        switch (data.dataType) {
             case TRAIN:
                 BatchResult trainingResult = this.train(images);
 
@@ -70,16 +70,21 @@ public class Network implements Consumer<EmnistData> {
 
                 // AVERAGE NETWORK STATISTICS
                 trainingStats.imageNum += data.emnistBatch.images.length;
-                trainingStats.accuracy = batchNum > 1 ? (trainingStats.accuracy + trainingResult.accuracy) / 2.0f : trainingResult.accuracy;
-                trainingStats.loss = batchNum > 1 ? (trainingStats.loss + trainingResult.loss) / 2.0f : trainingResult.loss;
+                trainingStats.accuracy = batchNum > 1 
+                        ? (trainingStats.accuracy + trainingResult.accuracy) / 2.0f
+                        : trainingResult.accuracy;
+                trainingStats.loss = batchNum > 1 
+                        ? (trainingStats.loss + trainingResult.loss) / 2.0f
+                        : trainingResult.loss;
 
-                if(data.emnistBatch.isLastBatch) {
-                    // AFTER TRAINING IS DONE SAVE THE FILTERS, WEIGHTS, BIAS, AND STATISTICS FOR LATER USE
+                if (data.emnistBatch.isLastBatch) {
+                    // AFTER TRAINING IS DONE SAVE THE FILTERS, WEIGHTS, BIAS, AND STATISTICS FOR
+                    // LATER USE
                     FileManagement.Filters.saveMatrix(convolution.cachedFilters);
                     FileManagement.Weights.saveMatrix(softMax.cachedWeights);
                     FileManagement.Bias.saveMatrix(softMax.cachedBias);
                     FileManagement.Statistics.saveStatistics(trainingStats, FileManagement.TRAINING_STATISTICS_FILENAME);
-                    
+
                     // REMOVE PREVIOUS (OUTDATED) TESTING STATISTICS
                     FileManagement.RemoveFile(FileManagement.TESTING_STATISTICS_FILENAME);
                 }
@@ -95,10 +100,14 @@ public class Network implements Consumer<EmnistData> {
 
                 // AVERAGE NETWORK STATISTICS
                 testingStats.imageNum += data.emnistBatch.images.length;
-                testingStats.accuracy = batchNum > 1 ? (testingStats.accuracy + testingResult.accuracy) / 2.0f : testingResult.accuracy;
-                testingStats.loss = batchNum > 1 ? (testingStats.loss + testingResult.loss) / 2.0f : testingResult.loss;
-                
-                if(data.emnistBatch.isLastBatch) {
+                testingStats.accuracy = batchNum > 1 
+                        ? (testingStats.accuracy + testingResult.accuracy) / 2.0f
+                        : testingResult.accuracy;
+                testingStats.loss = batchNum > 1 
+                        ? (testingStats.loss + testingResult.loss) / 2.0f 
+                        : testingResult.loss;
+
+                if (data.emnistBatch.isLastBatch) {
                     // AFTER TESTING IS DONE SAVE THE STATISTICS
                     FileManagement.Statistics.saveStatistics(testingStats, FileManagement.TESTING_STATISTICS_FILENAME);
                 }
@@ -115,7 +124,7 @@ public class Network implements Consumer<EmnistData> {
         int accurateTotal = 0;
         int lossTotal = 0;
 
-        for(EmnistImage emnistImage: images) {
+        for (EmnistImage emnistImage : images) {
             float[][] image = emnistImage.image;
             int label = emnistImage.label;
 
@@ -125,7 +134,7 @@ public class Network implements Consumer<EmnistData> {
             // CALCULATE CROSS-ENTROPY LOSS AND ACCURACY
             double loss = Math.log(outputLayer[0][label]);
             int accurate = label == Vector.getVectorArrayMaximumIndex(outputLayer) ? 1 : 0;
-      
+
             accurateTotal += accurate;
             lossTotal += loss;
         }
@@ -140,10 +149,10 @@ public class Network implements Consumer<EmnistData> {
         int accurateTotal = 0;
         int lossTotal = 0;
 
-        for(EmnistImage emnistImage: images) {
+        for (EmnistImage emnistImage : images) {
             float[][] image = emnistImage.image;
             int label = emnistImage.label;
-            
+
             // FORWARD PROPAGATE
             float[][] outputLayer = this.forwards(image);
 
@@ -165,11 +174,11 @@ public class Network implements Consumer<EmnistData> {
     }
 
     private float[][] forwards(float[][] image) {
-        // KERNAL LAYER  [8] x [26] x [26]
+        // KERNAL LAYER [8] x [26] x [26]
         float[][][] filterLayer = convolution.propagateForwards(image);
         // POOLING LAYER [8] x [13] x [13]
         float[][][] poolingLayer = maxPooling.propagateForwards(filterLayer);
-        // OUTPUT LAYER  [10]
+        // OUTPUT LAYER [10]
         return softMax.propagateForwards(poolingLayer);
     }
 
@@ -180,5 +189,5 @@ public class Network implements Consumer<EmnistData> {
         float[][][] pooling_gradient = maxPooling.propagateBackwards(softMax_gradient);
         convolution.propagateBackwards(pooling_gradient, learningRate);
     }
-    
+
 }

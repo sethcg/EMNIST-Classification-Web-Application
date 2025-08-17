@@ -51,7 +51,7 @@ public class ParquetFileReader {
             // CONSUMER LOADS IT AS AN EMPTY VECTOR SCHEMA ROOT
             try (   CDataDictionaryProvider consumerDictionaryProvider = new CDataDictionaryProvider();
                     VectorSchemaRoot consumerRoot = Data.importVectorSchemaRoot(allocator, consumerArrowSchema, consumerDictionaryProvider)) {
-                        
+
                 int epochNum = 1;
                 int batchNum = 1;
                 int indexOffset = 0;
@@ -71,7 +71,7 @@ public class ParquetFileReader {
                             String base64String = objectString.replaceAll("\\{|\\}|\\\"", "").split(":")[1];
                             byte[] bytes = Base64.getDecoder().decode(base64String);
                             ByteArrayInputStream imageStream = new ByteArrayInputStream(bytes);
-                            BufferedImage bufferedImage = ImageIO.read(imageStream);             
+                            BufferedImage bufferedImage = ImageIO.read(imageStream);
                             float[][] pixelMatrix = getMatrixFromImage(bufferedImage);
 
                             // GET LABEL
@@ -82,15 +82,15 @@ public class ParquetFileReader {
                         }
 
                         indexOffset += rowCount;
-                        
+
                         // PROCESS BATCH, AND RESET BATCHING PROCESS
-                        if(indexOffset >= EmnistData.batchSize) {                     
+                        if (indexOffset >= EmnistData.batchSize) {
                             boolean isLastBatch = batchNum == TOTAL_BATCH_NUM;
                             shuffleImages(images);
                             emnistData.emnistBatch = new EmnistBatch(epochNum, batchNum, images, isLastBatch);
                             processData.accept(emnistData);
 
-                            if(batchNum / (EmnistData.epochSize / EmnistData.batchSize) >= 1) {
+                            if (batchNum / (EmnistData.epochSize / EmnistData.batchSize) >= 1) {
                                 epochNum++;
                             }
                             batchNum++;
@@ -120,7 +120,7 @@ public class ParquetFileReader {
         int width = image.getWidth();
         int height = image.getHeight();
         float[][] outputMatrix = new float[width][height];
-        BiFunction<Integer, Integer> function = (x, y) -> { 
+        BiFunction<Integer, Integer> function = (x, y) -> {
             int colorValue = image.getRGB(x, y);
             // NORMALIZE THE COLOR VALUE BETWEEN 0.0 AND 1.0
             outputMatrix[x][y] = ((colorValue >> 16 & 0xff)) / 255.0f;

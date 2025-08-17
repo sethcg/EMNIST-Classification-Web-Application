@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import emnist.app.service.NetworkService;
 import emnist.app.service.network.NetworkStats;
+
 import jakarta.servlet.http.HttpServletResponse;
 
 @AutoConfigureMockMvc
@@ -38,11 +39,11 @@ public class NetworkControllerTest {
         // ARRANGE
         final String applicationName = "name";
         final String applicationVersion = "version";
-        
+
         // ACT
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders
-            .post("/api/ping"))
-            .andReturn();
+                .post("/api/ping"))
+                .andReturn();
 
         String content = result.getResponse().getContentAsString();
         String contentType = result.getResponse().getContentType();
@@ -60,7 +61,7 @@ public class NetworkControllerTest {
     public void PostMappingOfTrain() throws Exception {
         // ARRANGE/ACT
         mockMvc.perform(MockMvcRequestBuilders
-            .post("/api/train"));
+                .post("/api/train"));
 
         // ASSERT
         Mockito.verify(networkService, Mockito.times(1)).train();
@@ -70,7 +71,7 @@ public class NetworkControllerTest {
     public void PostMappingOfTest() throws Exception {
         // ARRANGE/ACT
         mockMvc.perform(MockMvcRequestBuilders
-            .post("/api/test"));
+                .post("/api/test"));
 
         // ASSERT
         Mockito.verify(networkService, Mockito.times(1)).test();
@@ -86,20 +87,20 @@ public class NetworkControllerTest {
         final NetworkStats networkStats = new NetworkStats(imageNum, accuracy, loss);
 
         Mockito.when(networkService
-            .getTrainingStatistics())
-            .thenReturn(networkStats.getMappedObject(hasNetwork));
+                .getTrainingStatistics())
+                .thenReturn(networkStats.getMappedObject(hasNetwork));
 
         // ACT
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders
-            .post("/api/trainingStats"))
-            .andReturn();
+                .post("/api/trainingStats"))
+                .andReturn();
 
         String content = result.getResponse().getContentAsString();
         String contentType = result.getResponse().getContentType();
 
         // ASSERT
         Mockito.verify(networkService, Mockito.times(1))
-            .getTrainingStatistics();
+                .getTrainingStatistics();
 
         Assertions.assertNotNull(content);
         Assertions.assertNotNull(contentType);
@@ -121,20 +122,20 @@ public class NetworkControllerTest {
         final NetworkStats networkStats = new NetworkStats(imageNum, accuracy, loss);
 
         Mockito.when(networkService
-            .getTestingStatistics())
-            .thenReturn(networkStats.getMappedObject(hasNetwork));
+                .getTestingStatistics())
+                .thenReturn(networkStats.getMappedObject(hasNetwork));
 
         // ACT
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders
-            .post("/api/testingStats"))
-            .andReturn();
+                .post("/api/testingStats"))
+                .andReturn();
 
         String content = result.getResponse().getContentAsString();
         String contentType = result.getResponse().getContentType();
 
         // ASSERT
         Mockito.verify(networkService, Mockito.times(1))
-            .getTestingStatistics();
+                .getTestingStatistics();
 
         Assertions.assertNotNull(content);
         Assertions.assertNotNull(contentType);
@@ -152,23 +153,23 @@ public class NetworkControllerTest {
         final Integer prediction = 0;
 
         Mockito.when(networkService
-            .predict(ArgumentMatchers.any()))
-            .thenReturn(prediction);
+                .predict(ArgumentMatchers.any()))
+                .thenReturn(prediction);
 
         // ACT
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders
-            .post("/api/predict")
-            .content(new ObjectMapper().writeValueAsString(new float[28][28]))
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON))
-            .andReturn();
+                .post("/api/predict")
+                .content(new ObjectMapper().writeValueAsString(new float[28][28]))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andReturn();
 
         String content = result.getResponse().getContentAsString();
         String contentType = result.getResponse().getContentType();
 
         // ASSERT
         Mockito.verify(networkService, Mockito.times(1))
-            .predict(ArgumentMatchers.any());
+                .predict(ArgumentMatchers.any());
 
         Assertions.assertNotNull(content);
         Assertions.assertNotNull(contentType);

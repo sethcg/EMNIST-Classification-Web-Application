@@ -9,7 +9,7 @@ import emnist.app.service.helper.FunctionHelper.TriFunction;
 import emnist.app.service.helper.Matrix;
 
 public class Convolution {
-    
+
     public float[][] cachedImage;
 
     public float[][][] cachedFilters;
@@ -17,8 +17,8 @@ public class Convolution {
     private float[][][] getFilters(boolean reset) {
         float[][][] filters = FileManagement.Filters.getMatrixFromFile();
         return reset || filters == null
-            ? initializeFilters(8, 3, 3)
-            : filters;
+                ? initializeFilters(8, 3, 3)
+                : filters;
     }
 
     public Convolution(boolean reset) {
@@ -51,7 +51,8 @@ public class Convolution {
 
     public float[][][] propagateForwards(float[][] image) {
         // CONVOLVE EACH [3] x [3] REGION OF THE IMAGE,
-        // USING "VALID" PADDING: NO ADDITIONAL ROWS/COLUMNS ARE ADDED TO THE IMAGE'S EDGE
+        // USING "VALID" PADDING: NO ADDITIONAL ROWS/COLUMNS ARE ADDED TO THE IMAGE'S
+        // EDGE
         float[][][] outputMatrix = new float[8][26][26];
         Function<Integer> function = (index) -> {
             outputMatrix[index] = convolveImage(image, cachedFilters[index]);
@@ -62,20 +63,21 @@ public class Convolution {
 
     public void propagateBackwards(float[][][] inputGradientMatrix, float learningRate) {
         float[][][] outputGradientMatrix = new float[cachedFilters.length][cachedFilters[0].length][cachedFilters[0][0].length];
-        for(int x = 1; x < cachedImage.length - 2; x++){
-            for(int y = 1; y < cachedImage[0].length - 2; y++){
-                for(int k = 0; k < cachedFilters.length; k++) {
+        for (int x = 1; x < cachedImage.length - 2; x++) {
+            for (int y = 1; y < cachedImage[0].length - 2; y++) {
+                for (int k = 0; k < cachedFilters.length; k++) {
                     // GET [3] x [3] REGION OF THE ORIGINAL IMAGE
-                    float[][] region = Matrix.getSubMatrix(cachedImage,  x - 1, x + 1, y - 1, y + 1);
-                    float[][] scaledGradient = Matrix.getElementWiseScaling(region, inputGradientMatrix[k][x - 1][y - 1]);
+                    float[][] region = Matrix.getSubMatrix(cachedImage, x - 1, x + 1, y - 1, y + 1);
+                    float[][] scaledGradient = Matrix.getElementWiseScaling(region,
+                            inputGradientMatrix[k][x - 1][y - 1]);
                     outputGradientMatrix[k] = Matrix.getElementWiseAddition(outputGradientMatrix[k], scaledGradient);
                 }
             }
         }
         // UPDATE THE FILTERS WITH THE LOSS GRADIENTS CALCULATED ABOVE
-        for(int i = 0; i < cachedFilters.length; i++) {
+        for (int i = 0; i < cachedFilters.length; i++) {
             float[][] lossGradient = Matrix.getElementWiseScaling(outputGradientMatrix[i], -learningRate);
-            cachedFilters[i]= Matrix.getElementWiseAddition(cachedFilters[i], lossGradient);
+            cachedFilters[i] = Matrix.getElementWiseAddition(cachedFilters[i], lossGradient);
         }
     }
 

@@ -11,8 +11,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 public class NotificationSerializer extends JsonSerializer<Notification> {
 
     public static String getJsonString(Notification notification) throws JsonProcessingException {
-        ObjectMapper mapper = new ObjectMapper();
-        return mapper.writeValueAsString(notification);
+        return new ObjectMapper().writeValueAsString(notification);
     }
 
     @Override

@@ -17,12 +17,12 @@ public class FileManagement {
     private static final Logger LOGGER = LoggerFactory.getLogger(FileManagement.class);
 
     private static final String DATA_DIRECTORY = System.getProperty("user.dir") + "/src/main/java/emnist/app/data/network/";
-    private static final String FILTERS_FILENAME =  DATA_DIRECTORY + "Filters.ser";
-    private static final String WEIGHTS_FILENAME =  DATA_DIRECTORY + "Weights.ser";
-    private static final String BIAS_FILENAME =  DATA_DIRECTORY + "Bias.ser";
+    private static final String FILTERS_FILENAME = DATA_DIRECTORY + "Filters.ser";
+    private static final String WEIGHTS_FILENAME = DATA_DIRECTORY + "Weights.ser";
+    private static final String BIAS_FILENAME = DATA_DIRECTORY + "Bias.ser";
 
-    public static final String TRAINING_STATISTICS_FILENAME =  DATA_DIRECTORY + "TrainingStats.ser";
-    public static final String TESTING_STATISTICS_FILENAME =  DATA_DIRECTORY + "TestingStats.ser";
+    public static final String TRAINING_STATISTICS_FILENAME = DATA_DIRECTORY + "TrainingStats.ser";
+    public static final String TESTING_STATISTICS_FILENAME = DATA_DIRECTORY + "TestingStats.ser";
 
     public static void RemoveFile(String fileName) {
         File file = new File(fileName);
@@ -42,7 +42,7 @@ public class FileManagement {
         public static void saveMatrix(float[][][] filters) {
             File directory = new File(DATA_DIRECTORY);
             if (!directory.exists()) directory.mkdir();
-            
+
             try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(FILTERS_FILENAME, false))) {
                 outputStream.writeObject(filters);
             } catch (Exception exception) {
@@ -75,7 +75,8 @@ public class FileManagement {
             File directory = new File(DATA_DIRECTORY);
             if (!directory.exists()) directory.mkdir();
 
-            try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(WEIGHTS_FILENAME, false))) {
+            try (ObjectOutputStream outputStream = new ObjectOutputStream(
+                    new FileOutputStream(WEIGHTS_FILENAME, false))) {
                 outputStream.writeObject(weights);
             } catch (Exception exception) {
                 LOGGER.error(String.format("[SAVING WEIGHTS FAILED] %s", exception.getMessage()));
@@ -138,7 +139,7 @@ public class FileManagement {
         public static void saveStatistics(NetworkStats stats, String fileName) {
             File directory = new File(DATA_DIRECTORY);
             if (!directory.exists()) directory.mkdir();
-            
+
             try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(fileName, false))) {
                 outputStream.writeObject(stats);
             } catch (IOException exception) {

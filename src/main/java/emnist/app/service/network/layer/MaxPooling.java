@@ -44,7 +44,7 @@ public class MaxPooling {
             int maxColumnIndex = 0;
             for (int rowIndex = 0; rowIndex < subRegion.length; rowIndex++) {
                 for (int columnIndex = 0; columnIndex < subRegion[0].length; columnIndex++) {
-                    if(subRegion[rowIndex][columnIndex] > subRegion[maxRowIndex][maxColumnIndex]) {
+                    if (subRegion[rowIndex][columnIndex] > subRegion[maxRowIndex][maxColumnIndex]) {
                         maxRowIndex = rowIndex;
                         maxColumnIndex = columnIndex;
                     }
@@ -53,7 +53,8 @@ public class MaxPooling {
             // ASSIGN THE MAXIMUM TO THE [8] x [26] x [26] OUTPUT GRADIENT MATRIX
             outputGradientMatrix[x][y * 2 + maxRowIndex][k * 2 + maxColumnIndex] = inputGradientMatrix[x][y][k];
         };
-        // LOOP THROUGH THE POOLED IMAGE [8] X [13] X [13] APPLYING THE MAXIMUM TO THE OUTPUT GRADIENT MATRIX
+        // LOOP THROUGH THE POOLED IMAGE [8] X [13] X [13] APPLYING THE MAXIMUM TO THE
+        // OUTPUT GRADIENT MATRIX
         FunctionHelper.executeFunction(cachedPooledImage.length, cachedPooledImage[0].length, cachedPooledImage[0][0].length, function);
         return outputGradientMatrix;
     }

@@ -5,7 +5,9 @@ public class EmnistData {
     public static int batchSize = 1000;
     public static int epochSize = 60000;
 
-    public static enum EmnistEnum { TRAIN, TEST }
+    public static enum EmnistEnum {
+        TRAIN, TEST
+    }
 
     public EmnistEnum dataType;
     public EmnistBatch emnistBatch;
