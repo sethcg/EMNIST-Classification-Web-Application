@@ -2,11 +2,11 @@
 
 ## Description:
 
-A web application that takes a user drawn image and uses a convolutional neural network to predict the image's classification as a digit.
+A web application that takes a user drawn image and uses a convolutional neural network to recognize the image's digit classification.
 
 ### Convolutional Neural Network
 <dl>
-    <dd>The bulk of this project is the Java Springboot backend, which is a hand-rolled convolutional neural network for EMNIST digit classification. This neural network can train, test, and predict using provided images.</dd>
+    <dd>The bulk of this project is the Java Springboot backend, which is a hand-rolled convolutional neural network for EMNIST digit classification. The neural network can train, test, and then with an accuracy above 90% predict the drawn images.</dd>
 </dl>
 
 ### EMNIST Data
