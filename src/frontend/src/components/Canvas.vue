@@ -1,31 +1,18 @@
 <script setup>
   import { ref, watch } from 'vue';
   import { Icon } from '@iconify/vue';
-
   import VueDrawingCanvas from 'vue-drawing-canvas';
   import CanvasControls from './CanvasControls.vue';
-
-  // PING THE SERVER, TO ENSURE THERE IS A CONNECTION
-  await fetch('/api/ping', { method: 'POST' })
-    .then((response) => response.text())
-    .then((message) => {
-      console.log(message);
-    })
-    .catch((error) => {
-      console.error(error);
-    });
+  import * as api from '../api/emnistApi.js';
 
   const emit = defineEmits(['update:prediction']);
   const props = defineProps({
-    prediction: {
-      type: Number,
-      required: true,
-    },
-    hasNetwork: {
-      type: Boolean,
-      required: true,
-    },
+    prediction: Number,
+    hasNetwork: Boolean,
   });
+
+  // PING THE SERVER, TO ENSURE THERE IS A CONNECTION
+  await api.ping((message) => console.log(message));
 
   const DrawingCanvas = ref(null);
   const image = ref('');
@@ -61,18 +48,7 @@
     }
 
     // GET DIGIT PREDICTION
-    fetch('/api/predict', {
-      method: 'POST',
-      body: JSON.stringify(image),
-      headers: { 'Content-Type': 'application/json; charset=utf-8' },
-    })
-      .then((response) => response.text())
-      .then((data) => {
-        const digit = parseInt(data);
-        if (!isNaN(digit)) {
-          emit('update:prediction', digit);
-        }
-      });
+    api.predict(image, (data) => emit('update:prediction', parseInt(data)));
   });
 </script>
 

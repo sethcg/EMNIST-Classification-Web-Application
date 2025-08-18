@@ -1,5 +1,6 @@
 <script setup>
   import { ref } from 'vue';
+  import * as api from '../api/emnistApi.js';
 
   const emit = defineEmits([
     'trainingComplete',
@@ -10,55 +11,50 @@
     'setTestingProgress',
   ]);
   const props = defineProps({
-    hasNetwork: {
-      type: Boolean,
-      required: true,
-    },
+    hasNetwork: Boolean,
   });
 
   const disabledTrain = ref(false);
   const disabledTest = ref(!props.hasNetwork);
 
-  const train = () => {
+  // HANDLE TRAINING THE CONVOLUTIONAL NEURAL NETWORK
+  const train = async () => {
     emit('setTrainingInProgress', true);
-    disabledTrain.value = true;
-    disabledTest.value = true;
+    (disabledTrain.value, (disabledTest.value = true));
+
     const eventSource = new EventSource('/api/notification');
     eventSource.onerror = (error) => console.error('Connection error:', error);
     eventSource.addEventListener('trainingUpdate', (event) => {
       const data = JSON.parse(event.data);
       emit('setTrainingProgress', data);
     });
-    fetch('/api/train', { method: 'POST' })
-      .then((response) => response.text())
-      .then(() => {
-        emit('setTrainingInProgress', false);
-        emit('trainingComplete');
-        eventSource.close();
-        disabledTrain.value = false;
-        disabledTest.value = false;
-      });
+
+    await api.train(() => {
+      emit('setTrainingInProgress', false);
+      emit('trainingComplete');
+      eventSource.close();
+      (disabledTrain.value, (disabledTest.value = false));
+    });
   };
 
-  const test = () => {
+  // HANDLE TESTING THE CONVOLUTIONAL NEURAL NETWORK
+  const test = async () => {
     emit('setTestingInProgress', true);
-    disabledTrain.value = true;
-    disabledTest.value = true;
+    (disabledTrain.value, (disabledTest.value = true));
+
     const eventSource = new EventSource('/api/notification');
     eventSource.onerror = (error) => console.error('Connection error:', error);
     eventSource.addEventListener('testingUpdate', (event) => {
       const data = JSON.parse(event.data);
       emit('setTestingProgress', data);
     });
-    fetch('/api/test', { method: 'POST' })
-      .then((response) => response.text())
-      .then(() => {
-        emit('setTestingInProgress', false);
-        emit('testingComplete');
-        eventSource.close();
-        disabledTrain.value = false;
-        disabledTest.value = false;
-      });
+
+    await api.test(() => {
+      emit('setTestingInProgress', false);
+      emit('testingComplete');
+      eventSource.close();
+      (disabledTrain.value, (disabledTest.value = false));
+    });
   };
 </script>
 

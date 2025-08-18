@@ -1,19 +1,13 @@
 <script setup>
   import { ref } from 'vue';
   import { Icon } from '@iconify/vue';
-
   import NetworkControls from './NetworkControls.vue';
+  import * as api from '../api/emnistApi.js';
 
   const emit = defineEmits(['update:hasNetwork', 'update:prediction']);
   const props = defineProps({
-    prediction: {
-      type: Number,
-      required: true,
-    },
-    hasNetwork: {
-      type: Boolean,
-      required: true,
-    },
+    prediction: Number,
+    hasNetwork: Boolean,
   });
 
   const trainingInProgress = ref(false);
@@ -29,22 +23,29 @@
 
   let imageNum = 0;
 
-  // HANDLE TRAINING PROGRESS VALUES, UPDATING EACH BATCH
-  const setTrainingInProgress = (inProgress) => {
-    imageNum = 0;
-    emit('update:prediction', null);
-    emit('update:hasNetwork', false);
-    trainingInProgress.value = inProgress;
-
-    trainingImageNum.value = 0;
-    trainingAccuracy.value = '0.0';
-    trainingLoss.value = '0.0';
-
+  const resetTestingData = () => {
     testingImageNum.value = 0;
     testingAccuracy.value = '0.0';
     testingLoss.value = '0.0';
   };
 
+  const resetTrainingData = () => {
+    testingImageNum.value = 0;
+    testingAccuracy.value = '0.0';
+    testingLoss.value = '0.0';
+  };
+
+  // SET TRAINING IN PROGRESS VALUES
+  const setTrainingInProgress = (inProgress) => {
+    imageNum = 0;
+    emit('update:prediction', null);
+    emit('update:hasNetwork', false);
+    trainingInProgress.value = inProgress;
+    resetTestingData();
+    resetTrainingData();
+  };
+
+  // HANDLE TRAINING PROGRESS VALUES, UPDATING EACH BATCH
   const setTrainingProgress = (data) => {
     imageNum += Number.parseInt(data.steps);
     trainingImageNum.value = Number.parseInt(imageNum);
@@ -52,15 +53,14 @@
     trainingLoss.value = Number.parseFloat(data.loss).toFixed(2);
   };
 
-  // HANDLE TESTING PROGRESS VALUES, UPDATING EACH BATCH
+  // SET TESTING IN PROGRESS VALUES
   const setTestingInProgress = (inProgress) => {
     imageNum = 0;
     testingInProgress.value = inProgress;
-    testingImageNum.value = 0;
-    testingAccuracy.value = '0.0';
-    testingLoss.value = '0.0';
+    resetTestingData();
   };
 
+  // HANDLE TESTING PROGRESS VALUES, UPDATING EACH BATCH
   const setTestingProgress = (data) => {
     imageNum += Number.parseInt(data.steps);
     testingImageNum.value = Number.parseInt(imageNum);
@@ -68,44 +68,34 @@
     testingLoss.value = Number.parseFloat(data.loss).toFixed(2);
   };
 
-  // GET NETWORK TRAINING STATISTICS IF APPLICABLE
+  // GET TRAINING STATISTICS
   const getTrainingResults = async () => {
-    await fetch('/api/trainingStats', { method: 'POST' })
-      .then((response) => response.text())
-      .then((json) => {
-        const data = JSON.parse(json);
+    api.trainingResults(
+      (data) => {
         if (String(data.hasNetwork).toLowerCase() === 'true') {
           trainingImageNum.value = Number.parseInt(data.imageNum);
           trainingAccuracy.value = Number.parseFloat(data.accuracy).toFixed(2);
           trainingLoss.value = Number.parseFloat(data.loss).toFixed(2);
           emit('update:hasNetwork', true);
-
-          testingImageNum.value = 0;
-          testingAccuracy.value = '0.0';
-          testingLoss.value = '0.0';
+          resetTestingData();
         }
-      })
-      .catch((error) => {
-        console.error(error);
-        emit('update:hasNetwork', false);
-      });
+      },
+      () => emit('update:hasNetwork', false)
+    );
   };
 
-  // GET NETWORK TESTING STATISTICS IF APPLICABLE
+  // GET TESTING STATISTICS
   const getTestingResults = async () => {
-    await fetch('/api/testingStats', { method: 'POST' })
-      .then((response) => response.text())
-      .then((json) => {
-        const data = JSON.parse(json);
+    api.testingResults(
+      (data) => {
         if (String(data.hasNetwork).toLowerCase() === 'true') {
           testingImageNum.value = Number.parseInt(data.imageNum);
           testingAccuracy.value = Number.parseFloat(data.accuracy).toFixed(2);
           testingLoss.value = Number.parseFloat(data.loss).toFixed(2);
         }
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+      },
+      (error) => console.error(error)
+    );
   };
 
   // INITIALIZE THE TRAINING/TESTING RESULTS, IF ANY

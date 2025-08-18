@@ -8,7 +8,8 @@ import org.mockito.Mockito;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -21,10 +22,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import emnist.app.service.NetworkService;
 import emnist.app.service.network.NetworkStats;
 
-import jakarta.servlet.http.HttpServletResponse;
-
+@WebMvcTest(NetworkController.class)
 @AutoConfigureMockMvc
-@SpringBootTest
 @TestPropertySource("classpath:test.properties")
 public class NetworkControllerTest {
 
@@ -53,7 +52,7 @@ public class NetworkControllerTest {
         Assertions.assertNotNull(contentType);
         Assertions.assertTrue(content.contains(applicationName));
         Assertions.assertTrue(content.contains(applicationVersion));
-        Assertions.assertTrue(result.getResponse().getStatus() == HttpServletResponse.SC_OK);
+        Assertions.assertTrue(result.getResponse().getStatus() == HttpStatus.OK.value());
         Assertions.assertTrue(contentType.contains(MediaType.TEXT_PLAIN_VALUE));
     }
 
@@ -104,7 +103,7 @@ public class NetworkControllerTest {
 
         Assertions.assertNotNull(content);
         Assertions.assertNotNull(contentType);
-        Assertions.assertTrue(result.getResponse().getStatus() == HttpServletResponse.SC_OK);
+        Assertions.assertTrue(result.getResponse().getStatus() == HttpStatus.OK.value());
         Assertions.assertTrue(content.contains(String.format("\"hasNetwork\":\"%s\"", Boolean.toString(hasNetwork))));
         Assertions.assertTrue(content.contains(String.format("\"imageNum\":\"%s\"", Integer.toString(imageNum))));
         Assertions.assertTrue(content.contains(String.format("\"accuracy\":\"%s\"", Double.toString(accuracy))));
@@ -139,7 +138,7 @@ public class NetworkControllerTest {
 
         Assertions.assertNotNull(content);
         Assertions.assertNotNull(contentType);
-        Assertions.assertTrue(result.getResponse().getStatus() == HttpServletResponse.SC_OK);
+        Assertions.assertTrue(result.getResponse().getStatus() == HttpStatus.OK.value());
         Assertions.assertTrue(content.contains(String.format("\"hasNetwork\":\"%s\"", Boolean.toString(hasNetwork))));
         Assertions.assertTrue(content.contains(String.format("\"imageNum\":\"%s\"", Integer.toString(imageNum))));
         Assertions.assertTrue(content.contains(String.format("\"accuracy\":\"%s\"", Double.toString(accuracy))));
@@ -173,7 +172,7 @@ public class NetworkControllerTest {
 
         Assertions.assertNotNull(content);
         Assertions.assertNotNull(contentType);
-        Assertions.assertTrue(result.getResponse().getStatus() == HttpServletResponse.SC_OK);
+        Assertions.assertTrue(result.getResponse().getStatus() == HttpStatus.OK.value());
         Assertions.assertTrue(content.equals(prediction.toString()));
         Assertions.assertTrue(contentType.equals(MediaType.APPLICATION_JSON_VALUE));
     }

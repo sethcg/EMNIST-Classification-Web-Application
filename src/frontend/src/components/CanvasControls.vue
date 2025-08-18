@@ -4,14 +4,8 @@
 
   const emit = defineEmits(['update:eraser']);
   const props = defineProps({
-    eraser: {
-      type: Boolean,
-      required: true,
-    },
-    hasNetwork: {
-      type: Boolean,
-      required: true,
-    },
+    eraser: Boolean,
+    hasNetwork: Boolean,
   });
 
   const isDrawActive = ref(true);
