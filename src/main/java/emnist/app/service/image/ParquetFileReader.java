@@ -37,7 +37,7 @@ import java.util.function.Consumer;
 public class ParquetFileReader {
 
     public void read(String uri, int numEpoch, EmnistData emnistData, Consumer<EmnistData> processData) {
-        final int TOTAL_BATCH_NUM = (numEpoch * EmnistData.epochSize) / EmnistData.batchSize;
+        final int TOTAL_BATCH_NUM = (numEpoch * emnistData.epochSize) / emnistData.batchSize;
         try (   BufferAllocator allocator = new RootAllocator();
                 DatasetFactory datasetFactory = new FileSystemDatasetFactory(allocator, NativeMemoryPool.getDefault(), FileFormat.PARQUET, uri);
                 Dataset dataset = datasetFactory.finish();
@@ -55,7 +55,7 @@ public class ParquetFileReader {
                 int epochNum = 1;
                 int batchNum = 1;
                 int indexOffset = 0;
-                EmnistImage[] images = new EmnistImage[EmnistData.batchSize];
+                EmnistImage[] images = new EmnistImage[emnistData.batchSize];
                 while (batchNum <= TOTAL_BATCH_NUM && reader.loadNextBatch()) {
                     try (ArrowArray consumerArray = ArrowArray.allocateNew(allocator)) {
                         // PRODUCER EXPORT DATA TO "consumerRoot"
@@ -84,18 +84,18 @@ public class ParquetFileReader {
                         indexOffset += rowCount;
 
                         // PROCESS BATCH, AND RESET BATCHING PROCESS
-                        if (indexOffset >= EmnistData.batchSize) {
+                        if (indexOffset >= emnistData.batchSize) {
                             boolean isLastBatch = batchNum == TOTAL_BATCH_NUM;
                             shuffleImages(images);
                             emnistData.emnistBatch = new EmnistBatch(epochNum, batchNum, images, isLastBatch);
                             processData.accept(emnistData);
 
-                            if (batchNum / (EmnistData.epochSize / EmnistData.batchSize) >= 1) {
+                            if (batchNum / (emnistData.epochSize / emnistData.batchSize) >= 1) {
                                 epochNum++;
                             }
                             batchNum++;
                             indexOffset = 0;
-                            images = new EmnistImage[EmnistData.batchSize];
+                            images = new EmnistImage[emnistData.batchSize];
                         }
                     }
                 }
@@ -105,7 +105,7 @@ public class ParquetFileReader {
         }
     }
 
-    private static void shuffleImages(EmnistImage[] images) {
+    private void shuffleImages(EmnistImage[] images) {
         // FISHER-YATES SHUFFLE ALGORITHM
         Random random = new Random();
         for (int i = images.length - 1; i > 0; i--) {
@@ -116,7 +116,7 @@ public class ParquetFileReader {
         }
     }
 
-    private static float[][] getMatrixFromImage(BufferedImage image) {
+    private float[][] getMatrixFromImage(BufferedImage image) {
         int width = image.getWidth();
         int height = image.getHeight();
         float[][] outputMatrix = new float[width][height];

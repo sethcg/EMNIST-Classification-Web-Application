@@ -4,7 +4,10 @@
         {
             "type": "java",
             "name": "Run Application",
-            "vmArgs": "--add-opens=java.base/java.nio=org.apache.arrow.memory.core,ALL-UNNAMED",
+            // FIX FOR THE JAVA ENVIRONMENT "APACHE ARROW" PARQUET READER
+            "vmArgs": [
+                "--add-opens=java.base/java.nio=org.apache.arrow.memory.core,ALL-UNNAMED"
+            ],
             "cwd": "${workspaceFolder}",
             "request": "launch",
             "mainClass": "${workspaceFolder}\\src\\main\\java\\emnist\\app\\Application.java",

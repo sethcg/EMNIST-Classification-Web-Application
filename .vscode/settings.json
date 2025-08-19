@@ -4,5 +4,10 @@
     "java.completion.importOrder": ["", "java", "javax", "#"],
     
     // IGNORE "UNKNOWN" PROPERTIES IN THE SPRING BOOT "application.properties" FILE
-    "spring-boot.ls.problem.application-properties.PROP_UNKNOWN_PROPERTY": "IGNORE"
+    "spring-boot.ls.problem.application-properties.PROP_UNKNOWN_PROPERTY": "IGNORE",
+
+    // FIX FOR THE JAVA ENVIRONMENT "APACHE ARROW" PARQUET READER
+    "java.test.config": {
+        "vmArgs": ["--add-opens=java.base/java.nio=org.apache.arrow.memory.core,ALL-UNNAMED"]
+    }
 }

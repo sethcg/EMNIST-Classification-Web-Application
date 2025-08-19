@@ -20,28 +20,31 @@ public class NetworkService {
     private static final String TRAINING_DATA_URI = "file:/" + DATA_DIRECTORY + "train.parquet";
     private static final String TESTING_DATA_URI = "file:/" + DATA_DIRECTORY + "test.parquet";
 
-    private static final Network network = new Network();
+    public Network network;
+    
+    public ParquetFileReader reader;
+
+    public NetworkService() {
+        this.network = new Network();
+        this.reader = new ParquetFileReader();
+    }
 
     public void train() {
-        EmnistData.epochSize = 60000;
-        EmnistData emnistData = new EmnistData(EmnistEnum.TRAIN);
+        EmnistData trainingData = new EmnistData(60000, EmnistEnum.TRAIN);
 
         // RESET THE NETWORK SAVED FILTER, WEIGHT, BIAS DATA
         network.reset();
-
-        ParquetFileReader reader = new ParquetFileReader();
-        reader.read(TRAINING_DATA_URI, 1, emnistData, network);
+        
+        reader.read(TRAINING_DATA_URI, 1, trainingData, network);
     }
 
     public void test() {
-        EmnistData.epochSize = 10000;
-        EmnistData emnistData = new EmnistData(EmnistEnum.TEST);
+        EmnistData testingData = new EmnistData(10000, EmnistEnum.TEST);
 
         // RESET THE NETWORK SAVED TESTING STATS
         network.testingStats = new NetworkStats();
-
-        ParquetFileReader reader = new ParquetFileReader();
-        reader.read(TESTING_DATA_URI, 1, emnistData, network);
+        
+        reader.read(TESTING_DATA_URI, 1, testingData, network);
     }
 
     public int predict(float[][] image) {

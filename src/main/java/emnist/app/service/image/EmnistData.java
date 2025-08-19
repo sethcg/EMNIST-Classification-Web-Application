@@ -2,8 +2,7 @@ package emnist.app.service.image;
 
 public class EmnistData {
 
-    public static int batchSize = 1000;
-    public static int epochSize = 60000;
+    public int batchSize, epochSize;
 
     public static enum EmnistEnum {
         TRAIN, TEST
@@ -12,7 +11,9 @@ public class EmnistData {
     public EmnistEnum dataType;
     public EmnistBatch emnistBatch;
 
-    public EmnistData(EmnistEnum dataType) {
+    public EmnistData(int epochSize, EmnistEnum dataType) {
+        this.batchSize = 1000;
+        this.epochSize = epochSize;
         this.dataType = dataType;
     }
 

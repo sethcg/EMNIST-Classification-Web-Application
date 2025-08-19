@@ -34,7 +34,7 @@ public class NetworkControllerTest {
     private NetworkService networkService;
 
     @Test
-    public void PostMappingOfPing() throws Exception {
+    public void PostMappingOfPing_ReturnsString() throws Exception {
         // ARRANGE
         final String applicationName = "name";
         final String applicationVersion = "version";
@@ -57,7 +57,7 @@ public class NetworkControllerTest {
     }
 
     @Test
-    public void PostMappingOfTrain() throws Exception {
+    public void PostMappingOfTrain_CompletesWithNoErrors() throws Exception {
         // ARRANGE/ACT
         mockMvc.perform(MockMvcRequestBuilders
                 .post("/api/train"));
@@ -67,7 +67,7 @@ public class NetworkControllerTest {
     }
 
     @Test
-    public void PostMappingOfTest() throws Exception {
+    public void PostMappingOfTest_CompletesWithNoErrors() throws Exception {
         // ARRANGE/ACT
         mockMvc.perform(MockMvcRequestBuilders
                 .post("/api/test"));
@@ -77,7 +77,7 @@ public class NetworkControllerTest {
     }
 
     @Test
-    public void PostMappingOfTrainingStats() throws Exception {
+    public void PostMappingOfTrainingStats_ReturnsJson() throws Exception {
         // ARRANGE
         final int imageNum = 60000;
         final double accuracy = 93.15;
@@ -112,7 +112,7 @@ public class NetworkControllerTest {
     }
 
     @Test
-    public void PostMappingOfTestingStats() throws Exception {
+    public void PostMappingOfTestingStats_ReturnsJson() throws Exception {
         // ARRANGE
         final int imageNum = 10000;
         final double accuracy = 91.15;
@@ -147,7 +147,7 @@ public class NetworkControllerTest {
     }
 
     @Test
-    public void PostMappingOfPredict() throws Exception {
+    public void PostMappingOfPredict_ReturnsJson() throws Exception {
         // ARRANGE
         final Integer prediction = 0;
 
