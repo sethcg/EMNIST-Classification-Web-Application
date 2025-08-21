@@ -9,24 +9,30 @@ import java.io.ObjectOutputStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import emnist.app.service.image.EmnistData.EmnistEnum;
 import emnist.app.service.network.NetworkStats;
 
 public class FileManagement {
 
+    public static final String DATA_DIRECTORY = System.getProperty("user.dir") + "/src/main/java/emnist/app/data/";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(FileManagement.class);
+    
+    private static final String NETWORK_DATA_DIRECTORY = DATA_DIRECTORY + "network/";
+    private static final String FILTERS_FILENAME = NETWORK_DATA_DIRECTORY + "Filters.ser";
+    private static final String WEIGHTS_FILENAME = NETWORK_DATA_DIRECTORY + "Weights.ser";
+    private static final String BIAS_FILENAME = NETWORK_DATA_DIRECTORY + "Bias.ser";
 
-    private static final String DATA_DIRECTORY = System.getProperty("user.dir") + "/src/main/java/emnist/app/data/network/";
-    private static final String FILTERS_FILENAME = DATA_DIRECTORY + "Filters.ser";
-    private static final String WEIGHTS_FILENAME = DATA_DIRECTORY + "Weights.ser";
-    private static final String BIAS_FILENAME = DATA_DIRECTORY + "Bias.ser";
+    private static final String TRAINING_STATISTICS_FILENAME = NETWORK_DATA_DIRECTORY + "TrainingStats.ser";
+    private static final String TESTING_STATISTICS_FILENAME = NETWORK_DATA_DIRECTORY + "TestingStats.ser";
 
-    public static final String TRAINING_STATISTICS_FILENAME = DATA_DIRECTORY + "TrainingStats.ser";
-    public static final String TESTING_STATISTICS_FILENAME = DATA_DIRECTORY + "TestingStats.ser";
+    public static boolean HasNetwork() {
+        return Filters.hasFile() && Weights.hasFile() && Bias.hasFile();
+    }
 
-    public static void RemoveFile(String fileName) {
-        File file = new File(fileName);
-        if (!file.exists()) file.delete();
+    private static void CreateSaveDirectory() {
+        File directory = new File(NETWORK_DATA_DIRECTORY);
+        if (!directory.exists()) directory.mkdir();
     }
 
     public static class Filters {
@@ -40,8 +46,7 @@ public class FileManagement {
         }
 
         public static void saveMatrix(float[][][] filters) {
-            File directory = new File(DATA_DIRECTORY);
-            if (!directory.exists()) directory.mkdir();
+            FileManagement.CreateSaveDirectory();
 
             try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(FILTERS_FILENAME, false))) {
                 outputStream.writeObject(filters);
@@ -72,11 +77,9 @@ public class FileManagement {
         }
 
         public static void saveMatrix(float[][] weights) {
-            File directory = new File(DATA_DIRECTORY);
-            if (!directory.exists()) directory.mkdir();
+            FileManagement.CreateSaveDirectory();
 
-            try (ObjectOutputStream outputStream = new ObjectOutputStream(
-                    new FileOutputStream(WEIGHTS_FILENAME, false))) {
+            try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(WEIGHTS_FILENAME, false))) {
                 outputStream.writeObject(weights);
             } catch (Exception exception) {
                 LOGGER.error(String.format("[SAVING WEIGHTS FAILED] %s", exception.getMessage()));
@@ -105,8 +108,7 @@ public class FileManagement {
         }
 
         public static void saveMatrix(float[][] bias) {
-            File directory = new File(DATA_DIRECTORY);
-            if (!directory.exists()) directory.mkdir();
+            FileManagement.CreateSaveDirectory();
 
             try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(BIAS_FILENAME, false))) {
                 outputStream.writeObject(bias);
@@ -128,28 +130,42 @@ public class FileManagement {
 
     public static class Statistics {
 
-        public static boolean hasFile(String fileName) {
-            try (ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(fileName))) {
+        private static String getFilename(EmnistEnum dataType) {
+            return (dataType == EmnistEnum.TRAIN) 
+                ? TRAINING_STATISTICS_FILENAME 
+                : TESTING_STATISTICS_FILENAME;
+        }
+
+        public static void removeFile(EmnistEnum dataType) {
+            String filename = getFilename(dataType);
+            File file = new File(filename);
+            if (!file.exists()) file.delete();
+        }
+
+        public static boolean hasFile(EmnistEnum dataType) {
+            String filename = getFilename(dataType);
+            try (ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(filename))) {
                 return (NetworkStats) inputStream.readObject() != null;
             } catch (Exception exception) {
                 return false;
             }
         }
 
-        public static void saveStatistics(NetworkStats stats, String fileName) {
-            File directory = new File(DATA_DIRECTORY);
-            if (!directory.exists()) directory.mkdir();
+        public static void saveStatistics(NetworkStats stats, EmnistEnum dataType) {
+            FileManagement.CreateSaveDirectory();
 
-            try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(fileName, false))) {
+            String filename = getFilename(dataType);
+            try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(filename, false))) {
                 outputStream.writeObject(stats);
             } catch (IOException exception) {
                 LOGGER.error(String.format("[SAVING STATISTICS FAILED] %s", exception.getMessage()));
-                LOGGER.debug(String.format("[FILE PATH] %s", fileName));
+                LOGGER.debug(String.format("[FILE PATH] %s", filename));
             }
         }
 
-        public static NetworkStats getObjectFromFile(String fileName) {
-            try (ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(fileName))) {
+        public static NetworkStats getObjectFromFile(EmnistEnum dataType) {
+            String filename = getFilename(dataType);
+            try (ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(filename))) {
                 return (NetworkStats) inputStream.readObject();
             } catch (Exception exception) {
                 return null;

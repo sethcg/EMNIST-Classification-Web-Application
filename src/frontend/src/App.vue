@@ -3,8 +3,13 @@
   import DrawingCanvas from './components/Canvas.vue';
   import Network from './components/Network.vue';
 
+  const props = defineProps({
+    hasNetwork: Boolean,
+  });
+  
+  const hasNetwork = ref(props.hasNetwork);
   const prediction = ref(null);
-  const hasNetwork = ref(null);
+
 </script>
 
 <template>

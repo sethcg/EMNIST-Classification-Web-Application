@@ -18,10 +18,10 @@ public class EmnistData {
     }
 
     public static class EmnistImage {
-        public int label;
+        public Integer label;
         public float[][] image;
 
-        public EmnistImage(int label, float[][] image) {
+        public EmnistImage(Integer label, float[][] image) {
             this.label = label;
             this.image = image;
         }

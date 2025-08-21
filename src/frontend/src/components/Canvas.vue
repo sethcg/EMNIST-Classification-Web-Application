@@ -79,7 +79,7 @@
       </div>
 
       <canvas id="output" class="hidden"></canvas>
-      <CanvasControls v-model:eraser="eraser" :hasNetwork="props.hasNetwork" />
+      <CanvasControls v-model:eraser="eraser" v-bind:has-network="props.hasNetwork" />
     </div>
   </div>
 </template>

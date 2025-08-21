@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import emnist.app.service.NetworkService;
+import emnist.app.service.helper.FileManagement;
 import emnist.app.service.notification.NotificationService;
 
 @RestController
@@ -31,6 +32,11 @@ public class NetworkController {
         string.append("\nName: " + environment.getProperty("application.name"));
         string.append("\nVersion: " + environment.getProperty("application.version"));
         return string.toString();
+    }
+
+    @PostMapping(value = "hasNetwork")
+    public boolean HasNetwork() {
+        return FileManagement.HasNetwork();
     }
 
     @PostMapping("train")

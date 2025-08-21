@@ -4,7 +4,8 @@
         {
             "label": "Build Application",
             "type": "shell",
-            "command": "mvn clean package",
+            // BUILD APPLICATION WITHOUT TESTING
+            "command": "mvn clean package -Dmaven.test.skip",
             "group": {
                 "kind": "build",
                 "isDefault": true

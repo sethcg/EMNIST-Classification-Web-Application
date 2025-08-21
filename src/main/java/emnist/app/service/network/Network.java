@@ -5,6 +5,7 @@ import java.util.function.Consumer;
 import emnist.app.service.helper.FileManagement;
 import emnist.app.service.helper.Vector;
 import emnist.app.service.image.EmnistData;
+import emnist.app.service.image.EmnistData.EmnistEnum;
 import emnist.app.service.image.EmnistData.EmnistImage;
 import emnist.app.service.network.layer.Convolution;
 import emnist.app.service.network.layer.MaxPooling;
@@ -83,10 +84,10 @@ public class Network implements Consumer<EmnistData> {
                     FileManagement.Filters.saveMatrix(convolution.cachedFilters);
                     FileManagement.Weights.saveMatrix(softMax.cachedWeights);
                     FileManagement.Bias.saveMatrix(softMax.cachedBias);
-                    FileManagement.Statistics.saveStatistics(trainingStats, FileManagement.TRAINING_STATISTICS_FILENAME);
+                    FileManagement.Statistics.saveStatistics(trainingStats, EmnistEnum.TRAIN);
 
                     // REMOVE PREVIOUS (OUTDATED) TESTING STATISTICS
-                    FileManagement.RemoveFile(FileManagement.TESTING_STATISTICS_FILENAME);
+                    FileManagement.Statistics.removeFile(EmnistEnum.TRAIN);
                 }
                 break;
             case TEST:
@@ -109,14 +110,14 @@ public class Network implements Consumer<EmnistData> {
 
                 if (data.emnistBatch.isLastBatch) {
                     // AFTER TESTING IS DONE SAVE THE STATISTICS
-                    FileManagement.Statistics.saveStatistics(testingStats, FileManagement.TESTING_STATISTICS_FILENAME);
+                    FileManagement.Statistics.saveStatistics(testingStats, EmnistEnum.TEST);
                 }
                 break;
         }
     }
 
-    public int predict(EmnistImage emnistImage) {
-        float[][] outputLayer = this.forwards(emnistImage.image);
+    public int predict(float[][] inputLayer) {
+        float[][] outputLayer = this.forwards(inputLayer);
         return Vector.getVectorArrayMaximumIndex(outputLayer);
     }
 

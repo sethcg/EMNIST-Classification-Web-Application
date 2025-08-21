@@ -5,13 +5,14 @@ import java.util.HashMap;
 
 public class NetworkStats implements Serializable {
 
-    public int imageNum = 0;
+    public Integer imageNum = 0;
 
-    public double accuracy, loss = 0.0f;
+    public Double accuracy = 0.0;
+    public Double loss = 0.0;
 
     public NetworkStats() { }
 
-    public NetworkStats(int imageNum, double accuracy, double loss) {
+    public NetworkStats(Integer imageNum, Double accuracy, Double loss) {
         this.imageNum = imageNum;
         this.accuracy = accuracy;
         this.loss = loss;

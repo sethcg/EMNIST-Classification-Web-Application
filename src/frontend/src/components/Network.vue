@@ -216,7 +216,7 @@
       @setTrainingProgress="setTrainingProgress"
       @setTestingInProgress="setTestingInProgress"
       @setTestingProgress="setTestingProgress"
-      :hasNetwork="hasNetwork" />
+      v-bind:has-network="hasNetwork" />
   </div>
 </template>
 

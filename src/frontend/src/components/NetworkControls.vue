@@ -20,7 +20,8 @@
   // HANDLE TRAINING THE CONVOLUTIONAL NEURAL NETWORK
   const train = async () => {
     emit('setTrainingInProgress', true);
-    (disabledTrain.value, (disabledTest.value = true));
+    disabledTrain.value = true;
+    disabledTest.value = true;
 
     const eventSource = new EventSource('/api/notification');
     eventSource.onerror = (error) => console.error('Connection error:', error);
@@ -33,14 +34,16 @@
       emit('setTrainingInProgress', false);
       emit('trainingComplete');
       eventSource.close();
-      (disabledTrain.value, (disabledTest.value = false));
+      disabledTrain.value = false;
+      disabledTest.value = false;
     });
   };
 
   // HANDLE TESTING THE CONVOLUTIONAL NEURAL NETWORK
   const test = async () => {
     emit('setTestingInProgress', true);
-    (disabledTrain.value, (disabledTest.value = true));
+    disabledTrain.value = true;
+    disabledTest.value = true;
 
     const eventSource = new EventSource('/api/notification');
     eventSource.onerror = (error) => console.error('Connection error:', error);
@@ -53,7 +56,8 @@
       emit('setTestingInProgress', false);
       emit('testingComplete');
       eventSource.close();
-      (disabledTrain.value, (disabledTest.value = false));
+      disabledTrain.value = false;
+      disabledTest.value = false;
     });
   };
 </script>
