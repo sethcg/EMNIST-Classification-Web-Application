@@ -6,10 +6,9 @@
   const props = defineProps({
     hasNetwork: Boolean,
   });
-  
+
   const hasNetwork = ref(props.hasNetwork);
   const prediction = ref(null);
-
 </script>
 
 <template>

@@ -15,7 +15,7 @@ public class Convolution {
     public float[][][] cachedFilters;
 
     private float[][][] getFilters(boolean reset) {
-        float[][][] filters = FileManagement.Filters.getMatrixFromFile();
+        float[][][] filters = FileManagement.getSavedFilters();
         return reset || filters == null
                 ? initializeFilters(8, 3, 3)
                 : filters;

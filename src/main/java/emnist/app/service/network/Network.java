@@ -81,13 +81,13 @@ public class Network implements Consumer<EmnistData> {
                 if (data.emnistBatch.isLastBatch) {
                     // AFTER TRAINING IS DONE SAVE THE FILTERS, WEIGHTS, BIAS, AND STATISTICS FOR
                     // LATER USE
-                    FileManagement.Filters.saveMatrix(convolution.cachedFilters);
-                    FileManagement.Weights.saveMatrix(softMax.cachedWeights);
-                    FileManagement.Bias.saveMatrix(softMax.cachedBias);
-                    FileManagement.Statistics.saveStatistics(trainingStats, EmnistEnum.TRAIN);
+                    FileManagement.saveFilters(convolution.cachedFilters);
+                    FileManagement.saveWeights(softMax.cachedWeights);
+                    FileManagement.saveBias(softMax.cachedBias);
+                    FileManagement.saveStats(trainingStats, EmnistEnum.TRAIN);
 
                     // REMOVE PREVIOUS (OUTDATED) TESTING STATISTICS
-                    FileManagement.Statistics.removeFile(EmnistEnum.TRAIN);
+                    FileManagement.deleteStats(EmnistEnum.TEST);
                 }
                 break;
             case TEST:
@@ -110,7 +110,7 @@ public class Network implements Consumer<EmnistData> {
 
                 if (data.emnistBatch.isLastBatch) {
                     // AFTER TESTING IS DONE SAVE THE STATISTICS
-                    FileManagement.Statistics.saveStatistics(testingStats, EmnistEnum.TEST);
+                    FileManagement.saveStats(testingStats, EmnistEnum.TEST);
                 }
                 break;
         }

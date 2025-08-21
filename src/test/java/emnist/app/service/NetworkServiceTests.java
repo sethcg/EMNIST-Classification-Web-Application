@@ -24,20 +24,16 @@ import emnist.app.service.network.NetworkStats;
 class NetworkServiceTests {
 
     private MockedStatic<FileManagement> mockFileManagement;
-    private MockedStatic<FileManagement.Statistics> mockedStatistics;
 
     @BeforeEach
     public void setUp() {
         mockFileManagement = Mockito.mockStatic(FileManagement.class);
         mockFileManagement.when(FileManagement::HasNetwork).thenReturn(true);
-
-        mockedStatistics = Mockito.mockStatic(FileManagement.Statistics.class);
     }
 
     @AfterEach
     public void tearDown() {
         mockFileManagement.close();
-        mockedStatistics.close();
     }
 
     @Mock
@@ -104,9 +100,9 @@ class NetworkServiceTests {
         Double accuracy = 93.2;
         Double loss = 0.04;
 
-        mockedStatistics.when(() -> FileManagement.Statistics.hasFile(ArgumentMatchers.any()))
+        mockFileManagement.when(() -> FileManagement.hasFile(ArgumentMatchers.any()))
                 .thenReturn(true);
-        mockedStatistics.when(() -> FileManagement.Statistics.getObjectFromFile(ArgumentMatchers.any()))
+        mockFileManagement.when(() -> FileManagement.getSavedStats(ArgumentMatchers.any()))
                 .thenReturn(new NetworkStats(imageNum, accuracy, loss));
 
         // ACT
@@ -126,9 +122,9 @@ class NetworkServiceTests {
         Double accuracy = 92.2;
         Double loss = 0.07;
 
-        mockedStatistics.when(() -> FileManagement.Statistics.hasFile(ArgumentMatchers.any()))
+        mockFileManagement.when(() -> FileManagement.hasFile(ArgumentMatchers.any()))
                 .thenReturn(true);
-        mockedStatistics.when(() -> FileManagement.Statistics.getObjectFromFile(ArgumentMatchers.any()))
+        mockFileManagement.when(() -> FileManagement.getSavedStats(ArgumentMatchers.any()))
                 .thenReturn(new NetworkStats(imageNum, accuracy, loss));
 
         // ACT

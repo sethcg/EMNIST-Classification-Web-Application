@@ -13,14 +13,14 @@ public class SoftMax {
     public float[][] softMaxTotals;
 
     private float[][] getBias(boolean reset) {
-        float[][] bias = FileManagement.Bias.getMatrixFromFile();
+        float[][] bias = FileManagement.getSavedBias();
         return reset || bias == null
                 ? Vector.getVectorArrayOfZero(10)
                 : bias;
     }
 
     private float[][] getWeights(boolean reset, int input, int output) {
-        float[][] weights = FileManagement.Weights.getMatrixFromFile();
+        float[][] weights = FileManagement.getSavedWeights();
         return reset || weights == null
                 ? Matrix.getElementWiseScaling(Matrix.getRandomizedMatrix(input, output), 1.0f / input)
                 : weights;

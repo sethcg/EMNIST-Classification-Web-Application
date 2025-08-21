@@ -17,9 +17,9 @@ public class NetworkService {
     private static final String TRAINING_DATA_URI = "file:/" + FileManagement.DATA_DIRECTORY + "train.parquet";
     private static final String TESTING_DATA_URI = "file:/" + FileManagement.DATA_DIRECTORY + "test.parquet";
 
-    public Network network;
+    private Network network;
     
-    public ParquetFileReader reader;
+    private ParquetFileReader reader;
 
     public NetworkService() {
         this.network = new Network();
@@ -49,8 +49,8 @@ public class NetworkService {
     }
 
     public HashMap<String, String> getTrainingStatistics() {
-        if (FileManagement.HasNetwork() && FileManagement.Statistics.hasFile(EmnistEnum.TRAIN)) {
-            NetworkStats networkStats = FileManagement.Statistics.getObjectFromFile(EmnistEnum.TRAIN);
+        if (FileManagement.HasNetwork() && FileManagement.hasFile(EmnistEnum.TRAIN)) {
+            NetworkStats networkStats = FileManagement.getSavedStats(EmnistEnum.TRAIN);
             return networkStats.getMappedObject(true);
         } else {
             NetworkStats networkStats = new NetworkStats();
@@ -59,8 +59,8 @@ public class NetworkService {
     }
 
     public HashMap<String, String> getTestingStatistics() {
-        if (FileManagement.HasNetwork() && FileManagement.Statistics.hasFile(EmnistEnum.TEST)) {
-            NetworkStats networkStats = FileManagement.Statistics.getObjectFromFile(EmnistEnum.TEST);
+        if (FileManagement.HasNetwork() && FileManagement.hasFile(EmnistEnum.TEST)) {
+            NetworkStats networkStats = FileManagement.getSavedStats(EmnistEnum.TEST);
             return networkStats.getMappedObject(true);
         } else {
             NetworkStats networkStats = new NetworkStats();
