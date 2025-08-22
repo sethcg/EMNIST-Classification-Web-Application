@@ -49,7 +49,7 @@ public class NetworkService {
     }
 
     public HashMap<String, String> getTrainingStatistics() {
-        if (FileManagement.HasNetwork() && FileManagement.hasFile(EmnistEnum.TRAIN)) {
+        if (FileManagement.hasNetwork() && FileManagement.hasFile(EmnistEnum.TRAIN)) {
             NetworkStats networkStats = FileManagement.getSavedStats(EmnistEnum.TRAIN);
             return networkStats.getMappedObject(true);
         } else {
@@ -59,7 +59,7 @@ public class NetworkService {
     }
 
     public HashMap<String, String> getTestingStatistics() {
-        if (FileManagement.HasNetwork() && FileManagement.hasFile(EmnistEnum.TEST)) {
+        if (FileManagement.hasNetwork() && FileManagement.hasFile(EmnistEnum.TEST)) {
             NetworkStats networkStats = FileManagement.getSavedStats(EmnistEnum.TEST);
             return networkStats.getMappedObject(true);
         } else {

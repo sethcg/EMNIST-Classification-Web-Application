@@ -28,7 +28,7 @@ class NetworkServiceTests {
     @BeforeEach
     public void setUp() {
         mockFileManagement = Mockito.mockStatic(FileManagement.class);
-        mockFileManagement.when(FileManagement::HasNetwork).thenReturn(true);
+        mockFileManagement.when(FileManagement::hasNetwork).thenReturn(true);
     }
 
     @AfterEach

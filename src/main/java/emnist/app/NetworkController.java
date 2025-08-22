@@ -36,7 +36,7 @@ public class NetworkController {
 
     @PostMapping(value = "hasNetwork")
     public boolean HasNetwork() {
-        return FileManagement.HasNetwork();
+        return FileManagement.hasNetwork();
     }
 
     @PostMapping("train")

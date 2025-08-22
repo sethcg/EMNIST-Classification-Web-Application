@@ -24,7 +24,7 @@ public class FileManagement {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FileManagement.class);
 
-    public static boolean HasNetwork() {
+    public static boolean hasNetwork() {
         return hasFile(FILTERS_FILENAME, float[][][].class) &&
                 hasFile(WEIGHTS_FILENAME, float[][].class) &&
                 hasFile(BIAS_FILENAME, float[][].class);
